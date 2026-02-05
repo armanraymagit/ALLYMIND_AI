@@ -1,0 +1,7 @@
+{
+  "name": "EduGenie AI Study Buddy",
+  "description": "An AI-powered academic companion that explains complex concepts, summarizes long notes, generates interactive flashcards, and creates custom quizzes to help students master any subject.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
