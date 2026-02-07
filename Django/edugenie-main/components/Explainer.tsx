@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { ChatMessage } from '../types';
+import { chatWithAI } from '../services/ollama'; // Import the specific chatWithAI function
 
 interface ExplainerProps {
   onInteraction?: () => void;
@@ -22,21 +22,7 @@ const Explainer: React.FC<ExplainerProps> = ({ onInteraction }) => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const chatSessionRef = useRef<any>(null);
-
-  const getChatSession = () => {
-    if (!chatSessionRef.current) {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-      chatSessionRef.current = ai.chats.create({
-        model: 'gemini-3-flash-preview',
-        config: {
-          systemInstruction: "You are a friendly, world-class academic tutor. Use the Feynman Technique. Encourage follow-up questions.",
-          temperature: 0.8,
-        },
-      });
-    }
-    return chatSessionRef.current;
-  };
+  // No longer needed: const chatSessionRef = useRef<any>(null); // Removed GoogleGenAI chat session
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -54,22 +40,15 @@ const Explainer: React.FC<ExplainerProps> = ({ onInteraction }) => {
     if (onInteraction) onInteraction();
 
     try {
-      const chat = getChatSession();
-      const stream = await chat.sendMessageStream({ message: textToSend });
-      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-
-      let fullResponse = '';
-      for await (const chunk of stream) {
-        const responseChunk = chunk as GenerateContentResponse;
-        fullResponse += responseChunk.text || '';
-        setMessages(prev => {
-          const updated = [...prev];
-          updated[updated.length - 1] = { role: 'assistant', content: fullResponse };
-          return updated;
-        });
-      }
+      // Construct history for chatWithAI
+      const history = messages.map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`).join('\n');
+      
+      const response = await chatWithAI(textToSend, history); // Use chatWithAI
+      
+      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Oops! My brain hit a snag. Could you try again?" }]);
+      console.error("Error sending message to Ollama:", error);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Oops! My brain hit a snag. Please ensure Ollama is running and try again." }]);
     } finally {
       setIsTyping(false);
     }
@@ -77,7 +56,7 @@ const Explainer: React.FC<ExplainerProps> = ({ onInteraction }) => {
 
   const clearChat = () => {
     if (window.confirm("Clear this conversation history?")) {
-      chatSessionRef.current = null;
+      // chatSessionRef.current = null; // No longer needed
       setMessages([{ role: 'assistant', content: "Fresh start! What concept should we tackle now?" }]);
     }
   };

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { generateQuiz } from '../services/gemini';
+import { generateQuiz } from '../services/ollama';
 import { QuizQuestion } from '../types';
 
 interface QuizViewProps {
@@ -22,14 +22,16 @@ const QuizView: React.FC<QuizViewProps> = ({ onQuizComplete }) => {
     if (!topic.trim() || isLoading) return;
     setIsLoading(true);
     try {
-      const quiz = await generateQuiz(topic, content);
+      const quiz = await generateQuiz(topic, content); // Use generateQuiz directly
+
       setQuestions(quiz);
       setCurrentIdx(0);
       setScore(0);
       setQuizFinished(false);
       setShowResult(false);
     } catch (error) {
-      alert("Error generating quiz.");
+      console.error("Error generating quiz:", error);
+      alert("Error generating quiz. Please ensure Ollama is running and try again.");
     } finally {
       setIsLoading(false);
     }

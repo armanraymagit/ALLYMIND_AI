@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:    
+  db:
+    image: pgvector/pgvector:0.8.1-pg18-bookworm # Using a newer version for pgvector compatibility
+    volumes:
+      - pgdata:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-django_llm_db}
+      POSTGRES_USER: ${POSTGRES_USER:-django_llm_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-django_llm_password}
+    ports:
+      - "5432:5432"
+    healthcheck: # Add a health check to ensure PostgreSQL is ready
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    command: "serve" # Ensure Ollama server starts
+    healthcheck: # Add a health check for Ollama
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  pgdata:
+  ollama_data:

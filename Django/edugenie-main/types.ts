@@ -21,7 +21,7 @@ export interface StudyNote {
   timestamp: number;
 }
 
-export type View = 'dashboard' | 'explainer' | 'summarizer' | 'flashcards' | 'quiz';
+export type View = 'dashboard' | 'explainer' | 'summarizer' | 'flashcards' | 'quiz' | 'quizGenerator' | 'hybridRAGChat' | 'documentManager' | 'djangoDemo';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';

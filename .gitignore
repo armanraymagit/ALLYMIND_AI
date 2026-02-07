@@ -1,0 +1,30 @@
+# Python
+**/env/
+**/venv/
+**/__pycache__/
+*.py[cod]
+*$py.class
+**/db.sqlite3
+
+# Node
+**/node_modules/
+**/dist/
+**/build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Large files / logs
+*.log
+Django/djangoLLM/final_import_log.txt
+Django/djangoLLM/import_log.txt
+Django/djangoLLM/compatibility_report.txt
+
+# Sub-repos (managed separately)
+Django/edugenie-main/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Note
+from .models import Note, TextEmbedding, StudyTime, Document
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,3 +20,21 @@ class NoteSerializer(serializers.ModelSerializer):
         model = Note
         fields = ["id", "title", "content", "created_at", "author"]
         extra_kwargs = {"author": {"read_only": True}}
+
+class TextEmbeddingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TextEmbedding
+        fields = ["id", "text", "embedding", "created_at"]
+        read_only_fields = ["embedding", "created_at"]
+
+class StudyTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudyTime
+        fields = ["id", "user", "date", "duration"]
+        extra_kwargs = {"user": {"read_only": True}}
+
+class DocumentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Document
+        fields = ["id", "user", "filename", "file_type", "upload_date", "status"]
+        extra_kwargs = {"user": {"read_only": True}}

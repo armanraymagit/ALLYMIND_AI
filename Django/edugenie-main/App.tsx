@@ -7,6 +7,13 @@ import Explainer from './components/Explainer';
 import Summarizer from './components/Summarizer';
 import FlashcardsView from './components/FlashcardsView';
 import QuizView from './components/QuizView';
+import QuizGenerator from './components/QuizGenerator'; // New import
+import HybridRAGChat from './components/HybridRAGChat'; // New import
+import DocumentManager from './components/DocumentManager'; // New import
+
+import Login from './components/Login';
+import Signup from './components/Signup';
+import { useAuth } from './AuthContext';
 
 const STORAGE_KEY = 'edugenie_study_data_v2';
 
@@ -27,8 +34,10 @@ const INITIAL_STATS = {
 };
 
 const App: React.FC = () => {
+  const { isLoggedIn, isLoading, logout } = useAuth();
   const [activeView, setActiveView] = useState<View>('dashboard');
-  
+  const [showLogin, setShowLogin] = useState<boolean>(true); // State to toggle between Login/Signup
+
   // Initialize state from localStorage or defaults
   const [chartData, setChartData] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -113,14 +122,38 @@ const App: React.FC = () => {
         return <FlashcardsView onSessionComplete={() => updateStudyProgress(15)} />;
       case 'quiz':
         return <QuizView onQuizComplete={updateQuizMetrics} />;
-      default:
+      case 'quizGenerator': // New case
+        // Quiz generation adds 20 mins
+        return <QuizGenerator />;
+      case 'hybridRAGChat': // New case
+        // Hybrid RAG chat interaction adds 5 mins
+        return <HybridRAGChat />;
+      case 'documentManager': // New case
+        return <DocumentManager />;
+            default:
         return <Dashboard onViewChange={setActiveView} chartData={chartData} stats={stats} onReset={handleResetDashboard} />;
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 text-slate-700">
+        Loading authentication...
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return showLogin ? (
+      <Login onSwitchToRegister={() => setShowLogin(false)} />
+    ) : (
+      <Signup onSwitchToLogin={() => setShowLogin(true)} />
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900">
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
+      <Sidebar activeView={activeView} onViewChange={setActiveView} onLogout={logout} />
       
       <main className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-64 transition-all">
         <header className="lg:hidden h-16 bg-white border-b flex items-center justify-between px-4 sticky top-0 z-10">

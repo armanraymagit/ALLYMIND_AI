@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { generateFlashcards } from '../services/gemini';
+import { generateFlashcards } from '../services/ollama';
 import { Flashcard } from '../types';
 
 interface FlashcardsViewProps {
@@ -19,13 +19,14 @@ const FlashcardsView: React.FC<FlashcardsViewProps> = ({ onSessionComplete }) =>
     if (!topic.trim() || isLoading) return;
     setIsLoading(true);
     try {
-      const generated = await generateFlashcards(topic, content);
+      const generated = await generateFlashcards(topic, content); // Use generateFlashcards directly
       setCards(generated);
       setCurrentIndex(0);
       setIsFlipped(false);
       if (onSessionComplete) onSessionComplete();
     } catch (error) {
-      alert("Failed to generate flashcards.");
+      console.error("Error generating flashcards:", error);
+      alert("Failed to generate flashcards. Please ensure Ollama is running and try again.");
     } finally {
       setIsLoading(false);
     }

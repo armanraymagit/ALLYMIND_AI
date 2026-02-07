@@ -5,9 +5,10 @@ import { View } from '../types';
 interface SidebarProps {
   activeView: View;
   onViewChange: (view: View) => void;
+  onLogout: () => void; // Add onLogout prop
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -23,6 +24,15 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
     )},
     { id: 'quiz', label: 'Quiz Master', icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+    )},
+    { id: 'quizGenerator', label: 'Generate Quiz', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+    )},
+    { id: 'hybridRAGChat', label: 'Chat with Notes', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.012 0 01-4.255-.949L3 20l1.395-3.105A9.776 9.012 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+    )},
+    { id: 'documentManager', label: 'Document Manager', icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
     )},
   ];
 
@@ -55,7 +65,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
       </nav>
 
       <div className="p-4 border-t">
-        <div className="bg-indigo-600 rounded-2xl p-4 text-white">
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <span>Logout</span>
+        </button>
+        <div className="bg-indigo-600 rounded-2xl p-4 text-white mt-4">
           <p className="text-xs font-semibold uppercase tracking-wider opacity-80 mb-2">Pro Tip</p>
           <p className="text-sm leading-relaxed">
             Generate flashcards from your summaries to memorize faster!
