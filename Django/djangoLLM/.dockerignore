@@ -1,0 +1,47 @@
+# Virtual environment
+env/
+venv/
+ENV/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Database files
+*.sqlite3
+db.sqlite3
+
+# Environment files
+.env
+.env.local
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Compiled cache
+unsloth_compiled_cache/
+
+# Log files
+*.log
+*.txt
+!requirements.txt
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
+!requirements.txt
