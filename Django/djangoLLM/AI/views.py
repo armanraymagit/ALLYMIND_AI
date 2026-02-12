@@ -330,4 +330,7 @@ def ollama_proxy_view(request):
             resp = _proxy_session.post(ollama_url, json=payload)
             return Response(resp.json(), status=resp.status_code)
     except Exception as e:
-        return Response({"error": f"Ollama proxy error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Ollama Proxy Error: {str(e)}\n{error_details}") # Print to server logs
+        return Response({"error": f"Ollama proxy error: {str(e)}", "details": error_details}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

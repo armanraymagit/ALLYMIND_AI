@@ -17,7 +17,13 @@ def get_ollama_client():
     """
     global _ollama_client
     if _ollama_client is None:
-        _ollama_client = ollama.Client(host=OLLAMA_HOST)
+        try:
+            _ollama_client = ollama.Client(host=OLLAMA_HOST)
+            # Test connection lightly
+            # _ollama_client.list() # Optional: heavy call, maybe skip for now or use a lighter check if possible
+        except Exception as e:
+            print(f"Failed to initialize Ollama client at {OLLAMA_HOST}: {e}")
+            raise e
     return _ollama_client
 
 def generate_embedding(text: str) -> list[float]:
