@@ -22,7 +22,7 @@ def create_test_image():
     return temp_file.name
 
 def test_image_classification():
-    """Test image classification with Qwen3-VL"""
+    """Test image classification with Llama 3.2 Vision"""
     print("\n" + "="*60)
     print("TEST 1: Image Classification")
     print("="*60)
@@ -32,7 +32,7 @@ def test_image_classification():
     
     try:
         response = client.generate(
-            model='qwen3-vl:4b',
+            model='llama3.2-vision:latest',
             prompt='Describe what shapes and colors you see in this image.',
             images=[test_image],
             keep_alive='30m'
@@ -87,7 +87,7 @@ JSON:"""
     
     try:
         response = client.generate(
-            model='llama3.2-custom',
+            model='llama3.2:latest',
             prompt=prompt,
             keep_alive='30m'
         )
@@ -147,7 +147,7 @@ JSON:"""
     
     try:
         response = client.generate(
-            model='llama3.2-custom',
+            model='llama3.2:latest',
             prompt=prompt,
             keep_alive='30m'
         )

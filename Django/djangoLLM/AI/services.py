@@ -5,8 +5,10 @@ from pgvector.django import CosineDistance # Import CosineDistance for vector si
 
 
 OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://ollama:11434') # 'ollama' is the service name in docker-compose
-OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'llama3.2-custom')
-OLLAMA_VISION_MODEL = os.getenv('OLLAMA_VISION_MODEL', 'qwen3-vl-custom')
+OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'llama3.2:latest')
+OLLAMA_VISION_MODEL = os.getenv('OLLAMA_VISION_MODEL', 'llama3.2-vision:latest')
+HUGGINGFACE_API_KEY = os.getenv('HUGGINGFACE_API_KEY')
+HF_VISION_MODEL = "Qwen/Qwen2-VL-2B-Instruct"
 
 # Shared Ollama client instance for connection reuse
 _ollama_client = None
@@ -184,7 +186,7 @@ def hybrid_rag_generation(query: str, user) -> str:
 
 def classify_image(image_path: str, max_dimension: int = 768) -> str:
     """
-    Classifies or describes an image using the Qwen 3 VL 4B model via Ollama.
+    Classifies or describes an image using Llama 3.2 Vision via Ollama (or Hugging Face if configured).
     Automatically resizes large images to improve processing speed.
     
     Args:
@@ -223,16 +225,79 @@ def classify_image(image_path: str, max_dimension: int = 768) -> str:
             img.save(temp_file.name, 'JPEG', quality=85)
             optimized_path = temp_file.name
         
-        response = client.generate(
-            model=OLLAMA_VISION_MODEL,
-            prompt='Describe this image in detail.',
-            images=[optimized_path],
-            keep_alive='30m' # Keep model loaded
-        )
-        return response['response']
+        # Prefer Hugging Face if API key is set; otherwise use Ollama with Llama 3.2 Vision
+        if HUGGINGFACE_API_KEY:
+            try:
+                print(f"[AI] Using Hugging Face for image classification: {HF_VISION_MODEL}")
+                return classify_image_hf(optimized_path)
+            except Exception as hf_err:
+                print(f"[AI] HF Classification failed, falling back to Ollama: {hf_err}")
+        # Ollama fallback: Llama 3.2 Vision
+        try:
+            prompt = "Classify this image into ONE of these categories: Math, Physics, ComputerScience, Chemistry, Biology, Assignment, ExamPaper, Notes, or Other. Provide only the category name."
+            response = client.generate(
+                model=OLLAMA_VISION_MODEL,
+                prompt=prompt,
+                images=[optimized_path],
+                keep_alive='30m'
+            )
+            return response.get('response', '').strip()
+        except Exception as ollama_err:
+            if not HUGGINGFACE_API_KEY:
+                return f"Ollama vision failed: {str(ollama_err)}. Set HUGGINGFACE_API_KEY for HF fallback or ensure {OLLAMA_VISION_MODEL} is available."
+            return f"Both HF and Ollama vision failed. Ollama: {str(ollama_err)}"
+
     except Exception as e:
-        return f"Error classifying image: {str(e)}"
+        return f"Error in image classification pipeline: {str(e)}"
     finally:
         # Clean up temporary file if created
         if temp_file and os.path.exists(temp_file.name):
             os.remove(temp_file.name)
+
+import requests
+import base64
+
+def huggingface_analyze_image(image_path: str, prompt: str) -> str:
+    """
+    Analyzes an image using Hugging Face Inference API.
+    """
+    if not HUGGINGFACE_API_KEY:
+        return "Error: HUGGINGFACE_API_KEY not set."
+
+    # Read and encode image
+    with open(image_path, "rb") as f:
+        img_str = base64.b64encode(f.read()).decode('utf-8')
+    
+    data_uri = f"data:image/jpeg;base64,{img_str}"
+    
+    api_url = f"https://api-inference.huggingface.co/models/{HF_VISION_MODEL}"
+    headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}", "Content-Type": "application/json"}
+    
+    payload = {
+        "inputs": {
+            "question": prompt,
+            "image": data_uri
+        },
+        "parameters": {
+            "max_new_tokens": 1000,
+            "temperature": 0.2
+        }
+    }
+    
+    try:
+        response = requests.post(api_url, headers=headers, json=payload)
+        response.raise_for_status()
+        result = response.json()
+        
+        if isinstance(result, list) and len(result) > 0:
+            return result[0].get('generated_text', str(result))
+        return result.get('generated_text', result.get('answer', str(result)))
+    except Exception as e:
+        return f"Error with HF API: {str(e)}"
+
+def classify_image_hf(image_path: str) -> str:
+    """
+    Classifies an image using Hugging Face.
+    """
+    prompt = "Classify this image into ONE of these categories: Math, Physics, ComputerScience, Chemistry, Biology, Assignment, ExamPaper, Notes, or Other. Provide only the category name."
+    return huggingface_analyze_image(image_path, prompt)

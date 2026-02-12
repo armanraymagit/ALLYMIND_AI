@@ -9,8 +9,8 @@ class Command(BaseCommand):
     help = 'Preloads Ollama models into VRAM to reduce inference latency'
 
     def add_arguments(self, parser):
-        OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'llama3.2-custom')
-        OLLAMA_VISION_MODEL = os.getenv('OLLAMA_VISION_MODEL', 'qwen3-vl-custom')
+        OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'llama3.2:latest')
+        OLLAMA_VISION_MODEL = os.getenv('OLLAMA_VISION_MODEL', 'llama3.2-vision:latest')
         parser.add_argument(
             '--models',
             nargs='+',
@@ -60,33 +60,40 @@ class Command(BaseCommand):
             for model in models:
                 self.stdout.write(f'Preloading model: {model}')
                 
-                # Check if model exists
+                # Check if model exists (match by name or tag, e.g. llama3.2:latest)
                 if not any(model in name for name in model_names):
-                    self.stdout.write(self.style.WARNING(
-                        f'Model {model} not found in available models. Attempting to create...'
-                    ))
-                    
-                    modelfile_path = 'Modelfile' if 'llama' in model else f'Modelfile.{model}'
-                    if not os.path.exists(modelfile_path) and 'llama' in model:
-                        modelfile_path = 'Modelfile'
-                    elif not os.path.exists(modelfile_path):
-                         # Fallback to general Modelfile if specific one not found
-                         modelfile_path = 'Modelfile'
-
-                    if os.path.exists(modelfile_path):
-                        self.stdout.write(f'Creating model {model} from {modelfile_path}...')
+                    # Try pulling from Ollama library first (llama3.2, llama3.2-vision, etc.)
+                    if 'llama3.2' in model or ':' in model:
+                        self.stdout.write(self.style.WARNING(
+                            f'Model {model} not found. Attempting to pull from Ollama library...'
+                        ))
                         try:
-                            with open(modelfile_path, 'r') as f:
-                                modelfile_content = f.read()
-                            # Ensure the Modelfile refers to the correct GGUF
-                            client.create(model=model, modelfile=modelfile_content)
-                            self.stdout.write(self.style.SUCCESS(f'✓ Model {model} created successfully'))
+                            client.pull(model)
+                            self.stdout.write(self.style.SUCCESS(f'✓ Model {model} pulled successfully'))
                         except Exception as e:
-                            self.stdout.write(self.style.ERROR(f'✗ Failed to create model {model}: {e}'))
+                            self.stdout.write(self.style.ERROR(f'✗ Failed to pull model {model}: {e}'))
                             continue
                     else:
-                        self.stdout.write(self.style.ERROR(f'Model {model} not found and no Modelfile available. Skipping.'))
-                        continue
+                        self.stdout.write(self.style.WARNING(
+                            f'Model {model} not found. Attempting to create from Modelfile...'
+                        ))
+                        modelfile_path = 'Modelfile' if 'llama' in model else f'Modelfile.{model}'
+                        if not os.path.exists(modelfile_path) and 'llama' in model:
+                            modelfile_path = 'Modelfile'
+                        elif not os.path.exists(modelfile_path):
+                            modelfile_path = 'Modelfile'
+                        if os.path.exists(modelfile_path):
+                            try:
+                                with open(modelfile_path, 'r') as f:
+                                    modelfile_content = f.read()
+                                client.create(model=model, modelfile=modelfile_content)
+                                self.stdout.write(self.style.SUCCESS(f'✓ Model {model} created successfully'))
+                            except Exception as e:
+                                self.stdout.write(self.style.ERROR(f'✗ Failed to create model {model}: {e}'))
+                                continue
+                        else:
+                            self.stdout.write(self.style.ERROR(f'Model {model} not found and no Modelfile. Skipping.'))
+                            continue
                 
                 try:
                     # Send a minimal request to load the model into VRAM

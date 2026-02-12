@@ -45,7 +45,7 @@ def benchmark_vision_performance():
         try:
             start_time = time.time()
             response = client.generate(
-                model='qwen3-vl:4b',
+                model='llama3.2-vision:latest',
                 prompt='Describe this image concisely.',
                 images=[img_path],
                 keep_alive='30m'
@@ -69,7 +69,7 @@ def benchmark_vision_performance():
         try:
             start_time = time.time()
             response = client.generate(
-                model='qwen3-vl:4b',
+                model='llama3.2-vision:latest',
                 prompt='Describe this image.',
                 images=[img_path]
             )
@@ -96,7 +96,7 @@ def benchmark_vision_performance():
     for img, prompt in prompts:
         try:
             response = client.generate(
-                model='qwen3-vl:4b',
+                model='llama3.2-vision:latest',
                 prompt=prompt,
                 images=[img]
             )

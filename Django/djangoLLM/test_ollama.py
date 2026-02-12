@@ -4,7 +4,7 @@ import json
 def test_ollama():
     url = "http://localhost:11434/api/generate"
     payload = {
-        "model": "llama3.2-custom",
+        "model": "llama3.2:latest",
         "prompt": "hi",
         "stream": False
     }

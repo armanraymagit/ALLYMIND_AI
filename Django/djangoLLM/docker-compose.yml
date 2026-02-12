@@ -32,8 +32,8 @@ services:
       - POSTGRES_PORT=5432
       - DJANGO_SETTINGS_MODULE=djangoLLM.settings
       - OLLAMA_HOST=http://host.docker.internal:11434
-      - OLLAMA_MODEL=llama3.2-custom
-      - OLLAMA_VISION_MODEL=qwen3-vl-custom
+      - OLLAMA_MODEL=llama3.2:latest
+      - OLLAMA_VISION_MODEL=llama3.2-vision:latest
     depends_on:
       db:
         condition: service_healthy

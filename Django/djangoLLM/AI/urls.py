@@ -21,4 +21,5 @@ urlpatterns = [
     path("documents/", views.DocumentListCreateView.as_view(), name="document-list-create"),
     path("documents/delete/<int:pk>/", views.DocumentDeleteView.as_view(), name="document-delete"),
     path("notes/upload-image/", views.ImageClassificationView.as_view(), name="upload-image"),
+    path("hf-proxy/", views.huggingface_proxy_view, name="hf-proxy"),
 ]

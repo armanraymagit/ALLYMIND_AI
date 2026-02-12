@@ -1,4 +1,5 @@
 # Use NVIDIA CUDA base image for GPU support
+# App uses Llama 3.2 (text) and Llama 3.2 Vision via OLLAMA_MODEL / OLLAMA_VISION_MODEL
 FROM nvidia/cuda:12.4.0-runtime-ubuntu22.04
 
 # Set environment variables

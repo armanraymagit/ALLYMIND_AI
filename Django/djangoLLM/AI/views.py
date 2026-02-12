@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import StreamingHttpResponse
 from rest_framework import generics, status
 from django.contrib.auth.models import User
 from .serializers import UserSerializer, NoteSerializer, TextEmbeddingSerializer, StudyTimeSerializer, DocumentSerializer
@@ -16,6 +17,11 @@ from rest_framework.parsers import MultiPartParser, FormParser
 import os # Import os for file handling
 import tempfile # Import tempfile for temporary file creation
 import traceback # Import traceback for detailed error logging
+import requests
+import json
+
+# Reuse the session to keep connection open
+_proxy_session = requests.Session()
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -293,13 +299,6 @@ def text_summarization_view(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-import requests
-import json
-from django.http import StreamingHttpResponse
-
-# Reuse the session to keep connection open
-_proxy_session = requests.Session()
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def ollama_proxy_view(request):
@@ -320,17 +319,105 @@ def ollama_proxy_view(request):
     try:
         if stream:
             def stream_generator():
-                with _proxy_session.post(ollama_url, json=payload, stream=True) as resp:
-                    for line in resp.iter_lines():
-                        if line:
-                            yield line + b'\n'
+                try:
+                    with _proxy_session.post(ollama_url, json=payload, stream=True, timeout=120) as resp:
+                        resp.raise_for_status()
+                        for line in resp.iter_lines():
+                            if line:
+                                yield line + b'\n'
+                except Exception as stream_err:
+                    print(f"Ollama Stream Error: {str(stream_err)}")
+                    yield json.dumps({"error": str(stream_err)}).encode() + b'\n'
             
             return StreamingHttpResponse(stream_generator(), content_type='application/x-ndjson')
         else:
-            resp = _proxy_session.post(ollama_url, json=payload)
+            resp = _proxy_session.post(ollama_url, json=payload, timeout=120)
             return Response(resp.json(), status=resp.status_code)
     except Exception as e:
-        import traceback
         error_details = traceback.format_exc()
-        print(f"Ollama Proxy Error: {str(e)}\n{error_details}") # Print to server logs
-        return Response({"error": f"Ollama proxy error: {str(e)}", "details": error_details}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        print(f"Ollama Proxy Error: {str(e)}\n{error_details}")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def huggingface_proxy_view(request):
+    """
+    Proxies vision requests to Hugging Face Inference API.
+    Uses the modern v1/chat/completions (OpenAI Compatible) API 
+    which is much more stable and avoids "410 Gone" errors.
+    """
+    hf_token = os.getenv('HUGGINGFACE_API_KEY')
+    if not hf_token:
+        return Response({"error": "Hugging Face API key not configured on server."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    model = request.data.get('model', 'Qwen/Qwen2-VL-2B-Instruct')
+    # Use the official router endpoint for v1/chat/completions
+    api_url = "https://router.huggingface.co/v1/chat/completions"
+    
+    headers = {
+        "Authorization": f"Bearer {hf_token}",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        payload = request.data.get('payload', {})
+        
+        # Convert legacy vision format to Messages format if needed
+        if "inputs" in payload and not "messages" in payload:
+            inputs = payload["inputs"]
+            text = inputs.get("question", "Analyze this image")
+            image = inputs.get("image", "")
+            
+            hf_payload = {
+                "model": model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": text},
+                            {"type": "image_url", "image_url": {"url": image}}
+                        ]
+                    }
+                ],
+                "max_tokens": 1024
+            }
+        else:
+            hf_payload = payload
+
+        payload_size = len(json.dumps(hf_payload))
+        print(f"[AI] Proxying to HF (Messages API): {model} | Payload size: {payload_size/1024:.1f} KB")
+
+        # Use requests.post directly instead of a global session to avoid pool issues with large payloads
+        # Adding a simple retry loop for network/ssl glitches
+        last_err = None
+        for attempt in range(2):
+            try:
+                resp = requests.post(api_url, headers=headers, json=hf_payload, timeout=90)
+                
+                if resp.status_code >= 400:
+                    print(f"[AI] HF Error {resp.status_code} on attempt {attempt+1}: {resp.text}")
+                    # If chat API is not supported (404), fall back to legacy
+                    if resp.status_code == 404 and attempt == 0:
+                        legacy_url = f"https://api-inference.huggingface.co/models/{model}"
+                        print(f"[AI] Chat API 404, trying legacy endpoint...")
+                        resp = requests.post(legacy_url, headers=headers, json=payload, timeout=90)
+                    
+                    # If we got a real error, return it
+                    if resp.status_code >= 400:
+                        return Response(resp.json() if "application/json" in resp.headers.get("Content-Type", "") else {"error": resp.text}, status=resp.status_code)
+
+                return Response(resp.json(), status=resp.status_code)
+            except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as net_err:
+                last_err = net_err
+                print(f"[AI] Network/SSL Error on attempt {attempt+1}: {str(net_err)}")
+                if attempt == 0:
+                    import time
+                    time.sleep(1) # Quick wait before retry
+                    continue
+                break
+        
+        raise last_err or Exception("Failed after retries")
+
+    except Exception as e:
+        print(f"HF Proxy Fatal Error: {str(e)}")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

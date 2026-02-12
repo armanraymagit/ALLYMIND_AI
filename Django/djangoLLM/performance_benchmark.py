@@ -77,18 +77,18 @@ if __name__ == "__main__":
     # Test text generation
     test_prompt = "Explain the concept of machine learning in simple terms."
     
-    print("\n[1/2] Testing Llama 3.2 Custom Model...")
-    llama_tps = benchmark_text_generation('llama3.2-custom', test_prompt)
+    print("\n[1/2] Testing Llama 3.2 Model...")
+    llama_tps = benchmark_text_generation('llama3.2:latest', test_prompt)
     
     # Test vision model
-    print("\n[2/2] Testing Qwen3-VL Custom Model...")
+    print("\n[2/2] Testing Llama 3.2 Vision Model...")
     # Create a simple test image if none exists
     test_image = "test_image.jpg"
     if not os.path.exists(test_image):
         print(f"  Note: Place a test image at {test_image} for vision benchmarking")
         print(f"  Skipping vision benchmark for now...")
     else:
-        qwen_latency = benchmark_vision('qwen3-vl-custom', test_image)
+        qwen_latency = benchmark_vision('llama3.2-vision:latest', test_image)
     
     print("\n" + "="*60)
     print("Benchmark Complete!")
