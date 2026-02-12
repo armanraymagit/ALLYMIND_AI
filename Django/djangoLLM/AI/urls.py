@@ -17,6 +17,8 @@ urlpatterns = [
     path("generate-quiz/", views.generate_quiz_view, name="generate-quiz"),
     path("hybrid-query/", views.hybrid_rag_query_view, name="hybrid-rag-query"),
     path("summarize-text/", views.text_summarization_view, name="summarize-text"),
+    path("ollama-proxy/", views.ollama_proxy_view, name="ollama-proxy"),
     path("documents/", views.DocumentListCreateView.as_view(), name="document-list-create"),
     path("documents/delete/<int:pk>/", views.DocumentDeleteView.as_view(), name="document-delete"),
+    path("notes/upload-image/", views.ImageClassificationView.as_view(), name="upload-image"),
 ]

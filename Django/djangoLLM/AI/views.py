@@ -6,7 +6,11 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .models import Note, TextEmbedding, StudyTime, Document
-from .services import generate_embedding, extract_text_from_pdf, summarize_text, transcribe_audio, extract_audio_from_video, generate_quiz, hybrid_rag_generation
+from .services import (
+    generate_embedding, extract_text_from_pdf, summarize_text, 
+    transcribe_audio, extract_audio_from_video, generate_quiz, 
+    hybrid_rag_generation, get_ollama_host, classify_image
+)
 from pgvector.django import CosineDistance, L2Distance
 from rest_framework.parsers import MultiPartParser, FormParser
 import os # Import os for file handling
@@ -192,6 +196,30 @@ class VideoUploadView(generics.CreateAPIView):
                 os.remove(temp_audio_path)
 
 
+class ImageClassificationView(generics.CreateAPIView):
+    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        image_file = request.data.get('image')
+        if not image_file:
+            return Response({"error": "No image file provided."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_image:
+            for chunk in image_file.chunks():
+                temp_image.write(chunk)
+            temp_image_path = temp_image.name
+
+        try:
+            description = classify_image(temp_image_path)
+            return Response({"description": description}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        finally:
+            if os.path.exists(temp_image_path):
+                os.remove(temp_image_path)
+
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def create_embedding(request):
@@ -264,3 +292,42 @@ def text_summarization_view(request):
         return Response({"summary": summary}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+import requests
+import json
+from django.http import StreamingHttpResponse
+
+# Reuse the session to keep connection open
+_proxy_session = requests.Session()
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def ollama_proxy_view(request):
+    """
+    Proxies requests from the frontend to the local Ollama instance.
+    Handles both standard and streaming responses.
+    Injects keep_alive to keep models loaded.
+    """
+    ollama_url = f"{get_ollama_host()}/api/generate"
+    payload = request.data
+    
+    # Inject keep_alive if not present, to ensure model stays in memory
+    if 'keep_alive' not in payload:
+        payload['keep_alive'] = '30m'
+
+    stream = payload.get('stream', False)
+
+    try:
+        if stream:
+            def stream_generator():
+                with _proxy_session.post(ollama_url, json=payload, stream=True) as resp:
+                    for line in resp.iter_lines():
+                        if line:
+                            yield line + b'\n'
+            
+            return StreamingHttpResponse(stream_generator(), content_type='application/x-ndjson')
+        else:
+            resp = _proxy_session.post(ollama_url, json=payload)
+            return Response(resp.json(), status=resp.status_code)
+    except Exception as e:
+        return Response({"error": f"Ollama proxy error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

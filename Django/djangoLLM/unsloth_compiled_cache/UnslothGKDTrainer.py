@@ -1,6 +1,6 @@
 """
-2026.1.4
-2026.1.4
+2026.2.1
+2026.2.1
 4.57.6
 0.24.0
 __UNSLOTH_VERSIONING__
@@ -26,8 +26,9 @@ from torch import Tensor
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+from unsloth_zoo.temporary_patches.common import torch_compile
 from typing import Any, List, Optional, Tuple, Union, Dict, Set, Callable
-from trl.trainer.gkd_trainer import (Any, AutoModelForCausalLM, BaseImageProcessor, Callable, DataCollator, DataCollatorForChatML, Dataset, EvalPrediction, F, FeatureExtractionMixin, GKDConfig, GKDTrainer, GenerationConfig, Optional, PeftConfig, PreTrainedModel, PreTrainedTokenizerBase, ProcessorMixin, SFTTrainer, TrainerCallback, Union, disable_dropout_in_model, empty_cache, nn, os, prepare_deepspeed, random, textwrap, torch, unwrap_model_for_generation, warnings)
+from trl.trainer.gkd_trainer import (Any, AutoModelForCausalLM, BaseImageProcessor, Callable, DataCollator, DataCollatorForChatML, Dataset, EvalPrediction, F, FeatureExtractionMixin, GKDConfig, GKDTrainer, GenerationConfig, Optional, PeftConfig, PreTrainedModel, PreTrainedTokenizerBase, ProcessorMixin, SFTTrainer, TrainerCallback, Union, disable_dropout_in_model, empty_cache, nn, os, prepare_deepspeed, random, textwrap, torch, unwrap_model_for_generation, warnings, AutoModelForCausalLM, BaseImageProcessor, Callable, DataCollator, DataCollatorForChatML, Dataset, EvalPrediction, F, FeatureExtractionMixin, GKDConfig, GenerationConfig, Optional, PeftConfig, PreTrainedModel, PreTrainedTokenizerBase, ProcessorMixin, SFTTrainer, TrainerCallback, Union, disable_dropout_in_model, nn, os, prepare_deepspeed, torch, warnings)
 
 
 import os
@@ -41,6 +42,7 @@ from torch.nn import functional as F
 import inspect
 from transformers import DataCollatorForSeq2Seq, DataCollatorForLanguageModeling as TransformersDataCollatorForLanguageModeling
 from transformers.training_args import ParallelMode
+from unsloth_zoo.device_type import DEVICE_TYPE, device_synchronize
 
 # Wrap trainer with padding to right and enable training mode
 # Also patches W&B since multiple runs must use wandb.finish()
@@ -102,15 +104,15 @@ def chunked_hidden_states_selective_log_softmax(
     logit_softcapping: float = 0.0,
     temperature: float = 1.0,
 ) -> torch.Tensor:
-    # All Unsloth Zoo code licensed under AGPL3 
-    flat_hidden_states = hidden_states.reshape(-1, hidden_states.shape[-1]) 
-    flat_index = index.reshape(-1)                                    
+    # All Unsloth Zoo code licensed under AGPL3
+    flat_hidden_states = hidden_states.reshape(-1, hidden_states.shape[-1])
+    flat_index = index.reshape(-1)
 
     chunked_hidden_states = torch.chunk(flat_hidden_states, chunks=chunks, dim=0)
     chunked_index = torch.chunk(flat_index, chunks=chunks, dim=0)
-    
+
     all_per_token_logps = []
-    
+
     for chunk_hidden_states, chunk_index in zip(chunked_hidden_states, chunked_index):
         chunk_logits = chunk_hidden_states.to(lm_head.dtype) @ lm_head.t()
 
@@ -130,9 +132,9 @@ def chunked_hidden_states_selective_log_softmax(
         logsumexp_values = torch.logsumexp(chunk_logits, dim=-1)
         per_token_logps = selected_logits - logsumexp_values
         all_per_token_logps.append(per_token_logps)
-    
+
     all_per_token_logps = torch.concat(all_per_token_logps)
-    
+
     all_per_token_logps = all_per_token_logps.reshape((hidden_states.shape[0], hidden_states.shape[1]))
     return all_per_token_logps
 
@@ -258,10 +260,10 @@ def align_logprobs_with_mask(
     return padded_logprobs
 
 def autotune_batch_and_chunks(
-    total_input_rows, 
-    seq_len, 
-    hidden_size, 
-    vocab_size, 
+    total_input_rows,
+    seq_len,
+    hidden_size,
+    vocab_size,
     dtype_bytes=16,
     multiplier=None
 ):
@@ -269,10 +271,19 @@ def autotune_batch_and_chunks(
         final_m = max(4, seq_len // 4096)
     else:
         final_m = multiplier
-    
+
     if torch.cuda.is_available():
         free_bytes, _ = torch.cuda.mem_get_info()
         limit_gb = (free_bytes / (1024**3))*.80
+    elif hasattr(torch, "xpu") and torch.xpu.is_available():
+        # For XPU: estimate free memory from total - reserved
+        total_mem = torch.xpu.get_device_properties(0).total_memory
+        reserved_mem = torch.xpu.memory_reserved()
+        free_bytes = total_mem - reserved_mem
+        limit_gb = (free_bytes / (1024**3)) * 0.80
+    else:
+        # Fallback: assume 8GB available
+        limit_gb = 8.0
 
     bytes_to_gb = 1024**3
 
@@ -284,7 +295,7 @@ def autotune_batch_and_chunks(
     logits_gb = base_logits / final_m
 
     total_mem_gb = hidden_gb + logits_gb
-    
+
     valid_mask = total_mem_gb <= limit_gb
     valid_indices = torch.nonzero(valid_mask, as_tuple=False)
 
@@ -516,17 +527,20 @@ class UnslothGKDConfig(GKDConfig):
     ):
         if learning_rate < 1e-7: print(f'Unsloth: Your learning rate of `{learning_rate}` is too small and less than 1e-7! Consider increasing it, otherwise gradient updates will be close to 0!')
         if learning_rate > 1: print(f'Unsloth: Your learning rate of `{learning_rate}` is way too larger > 1! Consider decreasing it to 1e-1, otherwise gradient updates will explode!')
+        if num_train_epochs is None:
+            num_train_epochs = 3.0  # Default to 3 epochs if None, max_steps will override
         if output_dir is None and save_strategy == 'steps' and save_steps == 500:
             output_dir = 'unsloth_training_checkpoints'
             save_strategy = 'no'
-        if dataset_num_proc is None:
+        import multiprocessing as _mp
+        if _mp.get_start_method() != 'fork':
+            dataset_num_proc = None
+        elif dataset_num_proc is None:
             import psutil
             dataset_num_proc = min(max((psutil.cpu_count() or 1)+4, 2), 64)
             memory_gb_left = psutil.virtual_memory().available / (1024**3)
-            if   memory_gb_left <=  4: dataset_num_proc = 1 # Too risky, so set to 1
-            elif memory_gb_left <=  6: dataset_num_proc = min(2, dataset_num_proc)
-            elif memory_gb_left <= 10: dataset_num_proc = min(4, dataset_num_proc)
-            elif memory_gb_left <= 14: dataset_num_proc = min(6, dataset_num_proc)
+            if memory_gb_left <= 2: dataset_num_proc = 1
+            else: dataset_num_proc = min(dataset_num_proc, int(memory_gb_left))
         if os.environ.get('UNSLOTH_ENABLE_FLEX_ATTENTION', '0') == '1':
             from unsloth_zoo.flex_attention import HAS_FLEX_ATTENTION
             if HAS_FLEX_ATTENTION and pad_to_multiple_of is None:
@@ -708,6 +722,7 @@ class UnslothGKDConfig(GKDConfig):
                 )
         self.unsloth_logit_chunk_multiplier = unsloth_logit_chunk_multiplier
         self.max_seq_length = max_seq_length
+
 pass
 
 class _UnslothGKDTrainer(SFTTrainer):

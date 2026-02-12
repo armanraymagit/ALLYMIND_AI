@@ -21,6 +21,14 @@ python3 -c "import ollama" 2>/dev/null || pip install ollama
 echo "Running database migrations..."
 python3 manage.py migrate --noinput
 
+# Preload (and create) Ollama models
+echo "Setting up Ollama models..."
+if curl -s -f "$OLLAMA_HOST/api/tags" > /dev/null; then
+    python3 manage.py preload_models || echo "Warning: Could not preload models"
+else
+    echo "Warning: Ollama is not reachable at $OLLAMA_HOST. Skipping model preloading."
+fi
+
 # Collect static files
 echo "Collecting static files..."
 python3 manage.py collectstatic --noinput || true

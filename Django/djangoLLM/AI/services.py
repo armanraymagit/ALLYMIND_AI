@@ -5,16 +5,31 @@ from pgvector.django import CosineDistance # Import CosineDistance for vector si
 
 
 OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://ollama:11434') # 'ollama' is the service name in docker-compose
+OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'llama3.2-custom')
+OLLAMA_VISION_MODEL = os.getenv('OLLAMA_VISION_MODEL', 'qwen3-vl-custom')
+
+# Shared Ollama client instance for connection reuse
+_ollama_client = None
+
+def get_ollama_client():
+    """
+    Returns a shared Ollama client instance.
+    """
+    global _ollama_client
+    if _ollama_client is None:
+        _ollama_client = ollama.Client(host=OLLAMA_HOST)
+    return _ollama_client
 
 def generate_embedding(text: str) -> list[float]:
     """
     Generates a vector embedding for the given text using Ollama.
     Assumes 'nomic-embed-text' model is available in Ollama.
     """
-    client = ollama.Client(host=OLLAMA_HOST)
+    client = get_ollama_client()
     response = client.embeddings(
         model='nomic-embed-text',
-        prompt=text
+        prompt=text,
+        keep_alive='30m'  # Keep model loaded for 30 minutes
     )
     return response['embedding']
 
@@ -27,6 +42,7 @@ def get_ollama_host() -> str:
 import PyPDF2
 import whisper # Import whisper
 from moviepy import VideoFileClip # Import moviepy
+from PIL import Image # Import PIL for image processing
 import tempfile
 import os
 
@@ -96,25 +112,33 @@ def summarize_text(text: str) -> str:
     """
     Summarizes the given text using the Llama 3.2 model via Ollama.
     """
-    client = ollama.Client(host=OLLAMA_HOST)
+    client = get_ollama_client()
     prompt = f"Summarize the following text concisely: {text}"
-    response = client.generate(model='llama3.2', prompt=prompt)
+    response = client.generate(
+        model=OLLAMA_MODEL,
+        prompt=prompt,
+        keep_alive='30m'  # Keep model loaded for 30 minutes
+    )
     return response['response']
 
 def generate_quiz(text: str) -> str:
     """
     Generates quiz questions from the given text using the Llama 3.2 model via Ollama.
     """
-    client = ollama.Client(host=OLLAMA_HOST)
+    client = get_ollama_client()
     prompt = f"Generate 3-5 multiple choice quiz questions (each with 4 options and the correct answer) from the following text: {text}"
-    response = client.generate(model='llama3.2', prompt=prompt)
+    response = client.generate(
+        model=OLLAMA_MODEL,
+        prompt=prompt,
+        keep_alive='30m'  # Keep model loaded for 30 minutes
+    )
     return response['response']
 
 def hybrid_rag_generation(query: str, user) -> str:
     """
     Generates a response using a hybrid RAG and fine-tuning approach with Llama 3.2 via Ollama.
     """
-    client = ollama.Client(host=OLLAMA_HOST)
+    client = get_ollama_client()
 
     # 1. Generate embedding for the query
     query_embedding = generate_embedding(query)
@@ -145,5 +169,64 @@ def hybrid_rag_generation(query: str, user) -> str:
         prompt = f"Answer the following question based on your knowledge: {query}"
 
     # 4. Generate response using Llama 3.2
-    response = client.generate(model='llama3.2', prompt=prompt)
+    response = client.generate(
+        model=OLLAMA_MODEL,
+        prompt=prompt,
+        keep_alive='30m'  # Keep model loaded for 30 minutes
+    )
     return response['response']
+
+def classify_image(image_path: str, max_dimension: int = 768) -> str:
+    """
+    Classifies or describes an image using the Qwen 3 VL 4B model via Ollama.
+    Automatically resizes large images to improve processing speed.
+    
+    Args:
+        image_path: Path to the image file
+        max_dimension: Maximum width/height (default 768px for optimal speed/quality balance)
+    """
+    client = get_ollama_client()
+    
+    # Check if file exists
+    if not os.path.exists(image_path):
+        return "Error: Image file not found."
+
+    optimized_path = image_path
+    temp_file = None
+    
+    try:
+        # Optimize image size for faster processing
+        img = Image.open(image_path)
+        width, height = img.size
+        
+        # Only resize if image is larger than max_dimension
+        if width > max_dimension or height > max_dimension:
+            # Calculate new size maintaining aspect ratio
+            if width > height:
+                new_width = max_dimension
+                new_height = int((max_dimension / width) * height)
+            else:
+                new_height = max_dimension
+                new_width = int((max_dimension / height) * width)
+            
+            # Resize image
+            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+            
+            # Save to temporary file
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+            img.save(temp_file.name, 'JPEG', quality=85)
+            optimized_path = temp_file.name
+        
+        response = client.generate(
+            model=OLLAMA_VISION_MODEL,
+            prompt='Describe this image in detail.',
+            images=[optimized_path],
+            keep_alive='30m' # Keep model loaded
+        )
+        return response['response']
+    except Exception as e:
+        return f"Error classifying image: {str(e)}"
+    finally:
+        # Clean up temporary file if created
+        if temp_file and os.path.exists(temp_file.name):
+            os.remove(temp_file.name)
