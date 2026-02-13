@@ -14,4 +14,7 @@ moviepy
 ollama
 requests
 Pillow
-
+gunicorn
+psutil
+httpx
+pydantic

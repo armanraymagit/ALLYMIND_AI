@@ -13,13 +13,29 @@ urlpatterns = [
     path("notes/upload-video/", views.VideoUploadView.as_view(), name="upload-video"),
     path("embeddings/create/", views.create_embedding, name="create-embedding"),
     path("embeddings/search/", views.search_embeddings, name="search-embeddings"),
-    path("study-time/", views.StudyTimeListCreate.as_view(), name="study-time-list-create"),
+    path(
+        "study-time/",
+        views.StudyTimeListCreate.as_view(),
+        name="study-time-list-create",
+    ),
     path("generate-quiz/", views.generate_quiz_view, name="generate-quiz"),
     path("hybrid-query/", views.hybrid_rag_query_view, name="hybrid-rag-query"),
     path("summarize-text/", views.text_summarization_view, name="summarize-text"),
     path("ollama-proxy/", views.ollama_proxy_view, name="ollama-proxy"),
-    path("documents/", views.DocumentListCreateView.as_view(), name="document-list-create"),
-    path("documents/delete/<int:pk>/", views.DocumentDeleteView.as_view(), name="document-delete"),
-    path("notes/upload-image/", views.ImageClassificationView.as_view(), name="upload-image"),
+    path(
+        "documents/",
+        views.DocumentListCreateView.as_view(),
+        name="document-list-create",
+    ),
+    path(
+        "documents/delete/<int:pk>/",
+        views.DocumentDeleteView.as_view(),
+        name="document-delete",
+    ),
+    path(
+        "notes/upload-image/",
+        views.ImageClassificationView.as_view(),
+        name="upload-image",
+    ),
     path("hf-proxy/", views.huggingface_proxy_view, name="hf-proxy"),
 ]

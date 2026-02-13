@@ -18,16 +18,28 @@ class Document(models.Model):
     filename = models.CharField(max_length=255)
     file_type = models.CharField(max_length=50)
     upload_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=[('processing', 'Processing'), ('indexed', 'Indexed'), ('failed', 'Failed')], default='processing')
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("processing", "Processing"),
+            ("indexed", "Indexed"),
+            ("failed", "Failed"),
+        ],
+        default="processing",
+    )
 
     def __str__(self):
         return f"{self.filename} ({self.get_status_display()})"
 
 
 class TextEmbedding(models.Model):
-    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="embeddings")
+    document = models.ForeignKey(
+        Document, on_delete=models.CASCADE, related_name="embeddings"
+    )
     text = models.TextField()
-    embedding = VectorField(dimensions=768)  # nomic-embed-text typically produces 768-dimensional embeddings
+    embedding = VectorField(
+        dimensions=768
+    )  # nomic-embed-text typically produces 768-dimensional embeddings
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

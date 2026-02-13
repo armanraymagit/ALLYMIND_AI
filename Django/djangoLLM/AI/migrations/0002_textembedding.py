@@ -5,20 +5,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('AI', '0001_initial'),
-        ('AI', '0003_enable_pgvector_extension'),
+        ("AI", "0001_initial"),
+        ("AI", "0003_enable_pgvector_extension"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TextEmbedding',
+            name="TextEmbedding",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('text', models.TextField(unique=True)),
-                ('embedding', pgvector.django.vector.VectorField(dimensions=768)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("text", models.TextField(unique=True)),
+                ("embedding", pgvector.django.vector.VectorField(dimensions=768)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
         ),
     ]

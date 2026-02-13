@@ -21,17 +21,20 @@ class NoteSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "content", "created_at", "author"]
         extra_kwargs = {"author": {"read_only": True}}
 
+
 class TextEmbeddingSerializer(serializers.ModelSerializer):
     class Meta:
         model = TextEmbedding
         fields = ["id", "text", "embedding", "created_at"]
         read_only_fields = ["embedding", "created_at"]
 
+
 class StudyTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudyTime
         fields = ["id", "user", "date", "duration"]
         extra_kwargs = {"user": {"read_only": True}}
+
 
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
