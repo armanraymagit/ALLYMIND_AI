@@ -1,6 +1,5 @@
 
 import { preprocessHandwritingImage } from '../services/imageEnhancer';
-import { extractTextFromImage } from '../services/ollama';
 
 // Mock browser environment for Canvas API
 import { JSDOM } from 'jsdom';

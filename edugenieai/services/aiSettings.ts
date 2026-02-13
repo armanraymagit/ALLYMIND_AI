@@ -10,4 +10,4 @@ export const getPreferredProvider = (): AIProvider => {
 };
 
 export const getAIProvider = getPreferredProvider;
-export const setAIProvider = (_provider: AIProvider) => { };
+export const setAIProvider = (_: AIProvider) => { };

@@ -39,7 +39,7 @@ const FlashcardsView: React.FC<FlashcardsViewProps> = ({ onSessionComplete, init
       }
 
       if (onSessionComplete) onSessionComplete();
-    } catch (error) {
+    } catch {
       alert("Failed to generate flashcards.");
     } finally {
       setIsLoading(false);
@@ -102,8 +102,8 @@ const FlashcardsView: React.FC<FlashcardsViewProps> = ({ onSessionComplete, init
                       key={num}
                       onClick={() => setCardCount(num)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${cardCount === num
-                          ? 'bg-indigo-600 text-white shadow-md'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                         }`}
                     >
                       {num}

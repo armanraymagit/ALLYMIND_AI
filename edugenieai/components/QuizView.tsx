@@ -83,7 +83,7 @@ const QuizView: React.FC<QuizViewProps> = ({ onQuizComplete, initialTopic = '', 
           }
         });
       }
-    } catch (error) {
+    } catch {
       alert("Error generating quiz.");
     } finally {
       setIsLoading(false);

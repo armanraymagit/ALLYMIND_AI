@@ -1,5 +1,4 @@
 import { Flashcard, QuizQuestion } from "../types";
-import { preprocessHandwritingImage, preprocessMultipleHandwritingImages } from './imageEnhancer';
 import { api, API_BASE_URL } from './api';
 
 // Re-export image classification service
@@ -31,11 +30,11 @@ export {
 };
 
 // Ollama API configuration
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+// const OLLAMA_BASE_URL = import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434';
 // Default to llama3.2 associated models
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:latest';
+const OLLAMA_MODEL = import.meta.env.VITE_OLLAMA_MODEL || 'llama3.2:latest';
 // Vision model for summarization and OCR
-const VISION_MODEL = process.env.NEXT_PUBLIC_OLLAMA_VISION_MODEL || process.env.OLLAMA_VISION_MODEL || 'llama3.2-vision:latest';
+const VISION_MODEL = import.meta.env.VITE_OLLAMA_VISION_MODEL || 'llama3.2-vision:latest';
 
 /**
  * Purge other models from VRAM to make room for vision tasks.
@@ -44,7 +43,7 @@ const VISION_MODEL = process.env.NEXT_PUBLIC_OLLAMA_VISION_MODEL || process.env.
 export const purgeModelsExcept = async (keepModel: string): Promise<void> => {
   try {
     console.log(`[Ollama] Purging VRAM, keeping only: ${keepModel}`);
-    const activeModels = await api.fetchWithAuth('/api/ai/ollama-proxy/', {
+    await api.fetchWithAuth('/api/ai/ollama-proxy/', {
       method: 'GET',
       // This is a custom endpoint we might need to handle, but for now we'll assumes
       // the proxy can handle /api/ps or we'll just try to unload common ones.
@@ -81,12 +80,7 @@ export const unloadModel = async (modelName: string): Promise<void> => {
   }
 };
 
-interface OllamaResponse {
-  model: string;
-  created_at: string;
-  response: string;
-  done: boolean;
-}
+
 
 interface OllamaGenerateRequest {
   model: string;
@@ -200,8 +194,8 @@ const streamOllama = async (
                 fullResponse += token;
                 if (onToken) onToken(token);
               }
-            } catch (e) {
-              console.error('Error parsing JSON chunk', e);
+            } catch {
+              console.error('Error parsing JSON chunk');
             }
           }
         }
@@ -366,10 +360,10 @@ export const trimRepetitionLoop = (text: string, minChunkLen = 40): string => {
  */
 export const summarizeImage = async (
   images: string | string[],
-  _mimeType: string,
+  _: string,
   onToken?: (token: string) => void,
-  _enhanceHandwriting: boolean = false,
-  _provider: AIProvider = DEFAULT_PROVIDER
+  _2: boolean = false,
+  _3: AIProvider = DEFAULT_PROVIDER
 ): Promise<string> => {
   const imageArray = Array.isArray(images) ? images : [images];
   const image = imageArray[0];
@@ -436,8 +430,8 @@ Stop after the summary. Do not repeat. Output nothing after the final ---.`;
 export const extractTextFromImage = async (
   images: string | string[],
   onToken?: (token: string) => void,
-  _enhanceHandwriting: boolean = false,
-  _provider: AIProvider = DEFAULT_PROVIDER
+  _: boolean = false,
+  __: AIProvider = DEFAULT_PROVIDER
 ): Promise<string> => {
   const imageArray = Array.isArray(images) ? images : [images];
   const image = imageArray[0];
@@ -484,7 +478,7 @@ export const extractTextFromImage = async (
  * Enforces JSON output mode for reliability
  * Note: includeImages parameter is accepted for compatibility but Ollama doesn't generate images
  */
-export const generateFlashcards = async (topic: string, content: string, count: number = 8, includeImages: boolean = false): Promise<Flashcard[]> => {
+export const generateFlashcards = async (topic: string, content: string, count: number = 8, _: boolean = false): Promise<Flashcard[]> => {
   const prompt = `Generate exactly ${count} flashcards based on the following topic and content.
 
 Topic: ${topic}
@@ -522,7 +516,7 @@ Each flashcard must have exactly two fields: "front" and "back".`;
     let parsed: any;
     try {
       parsed = JSON.parse(response);
-    } catch (parseError) {
+    } catch {
       // If direct parse fails, try to extract JSON array from response
       const startIndex = response.indexOf('[');
       const endIndex = response.lastIndexOf(']') + 1;
@@ -591,7 +585,7 @@ Each flashcard must have exactly two fields: "front" and "back".`;
  * Enforces JSON output mode for reliability
  * Note: includeImages parameter is accepted for compatibility but Ollama doesn't generate images
  */
-export const generateQuiz = async (topic: string, content: string, count: number = 5, includeImages: boolean = false): Promise<QuizQuestion[]> => {
+export const generateQuiz = async (topic: string, content: string, count: number = 5, _: boolean = false): Promise<QuizQuestion[]> => {
   const prompt = `Generate exactly ${count} multiple choice quiz questions based on the following topic and content.
 
 Topic: ${topic}
@@ -636,7 +630,7 @@ Each question must have: "question", "options" (array of 4 strings), "correctAns
     let parsed: any;
     try {
       parsed = JSON.parse(response);
-    } catch (parseError) {
+    } catch {
       // If direct parse fails, try to extract JSON array from response
       const startIndex = response.indexOf('[');
       const endIndex = response.lastIndexOf(']') + 1;

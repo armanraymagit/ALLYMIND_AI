@@ -253,6 +253,51 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved).viewUsage || INITIAL_VIEW_USAGE : INITIAL_VIEW_USAGE;
   });
 
+  const syncDataFromBackend = React.useCallback(async () => {
+    try {
+      const backendStats = await api.getStudyStats();
+      if (Array.isArray(backendStats)) {
+        // Update stats
+        const totals = backendStats.reduce((acc: any, curr: any) => {
+          acc.studySeconds += curr.duration;
+          return acc;
+        }, { studySeconds: 0 });
+
+        setStats((prev: any) => ({
+          ...prev,
+          studySeconds: totals.studySeconds
+        }));
+
+        // Update chart data
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const newChartData = [...INITIAL_CHART_DATA];
+
+        backendStats.forEach((entry: any) => {
+          const date = new Date(entry.date);
+          const dayName = days[date.getDay()];
+          const chartEntry = newChartData.find(d => d.name.startsWith(dayName.substring(0, 3)));
+          if (chartEntry) {
+            chartEntry.hours = parseFloat((entry.duration / 3600).toFixed(4));
+          }
+        });
+
+        setChartData(newChartData);
+      }
+    } catch (error) {
+      console.warn('Failed to sync data from backend:', error);
+    }
+  }, []);
+
+  const syncStudyTimeToBackend = React.useCallback(async (seconds: number) => {
+    if (!isAuthenticated) return;
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      await api.syncStudyTime(today, seconds);
+    } catch (error) {
+      console.warn('Failed to sync study time to backend:', error);
+    }
+  }, [isAuthenticated]);
+
   const updateStudyProgress = (secondsToAdd: number) => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = days[new Date().getDay()];
@@ -302,60 +347,23 @@ const App: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeView]);
+  }, [activeView, viewUsage, syncStudyTimeToBackend]);
 
   // Preload AI model to reduce TTFT
   useEffect(() => {
-    if (isAuthenticated) {
-      preloadModel();
-      syncDataFromBackend();
-    }
-  }, [isAuthenticated]);
-
-  const syncDataFromBackend = async () => {
-    try {
-      const backendStats = await api.getStudyStats();
-      if (Array.isArray(backendStats)) {
-        // Update stats
-        const totals = backendStats.reduce((acc: any, curr: any) => {
-          acc.studySeconds += curr.duration;
-          return acc;
-        }, { studySeconds: 0 });
-
-        setStats((prev: any) => ({
-          ...prev,
-          studySeconds: totals.studySeconds
-        }));
-
-        // Update chart data
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const newChartData = [...INITIAL_CHART_DATA];
-
-        backendStats.forEach((entry: any) => {
-          const date = new Date(entry.date);
-          const dayName = days[date.getDay()];
-          const chartEntry = newChartData.find(d => d.name.startsWith(dayName.substring(0, 3)));
-          if (chartEntry) {
-            chartEntry.hours = parseFloat((entry.duration / 3600).toFixed(4));
-          }
-        });
-
-        setChartData(newChartData);
+    const initData = async () => {
+      if (isAuthenticated) {
+        try {
+          await preloadModel();
+          await syncDataFromBackend();
+        } catch (error) {
+          console.warn('Initial sync failed:', error);
+        }
       }
-    } catch (error) {
-      console.warn('Failed to sync data from backend:', error);
-    }
-  };
+    };
+    initData();
+  }, [isAuthenticated, syncDataFromBackend]);
 
-  const syncStudyTimeToBackend = async (seconds: number) => {
-    if (!isAuthenticated) return;
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      await api.syncStudyTime(today, seconds);
-    } catch (error) {
-      console.warn('Failed to sync study time to backend:', error);
-    }
-  };
 
   const handleLogout = () => {
     api.setToken(null);

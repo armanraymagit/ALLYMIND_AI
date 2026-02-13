@@ -8,11 +8,11 @@ import { api } from './api';
 
 // AI Provider Preference
 export type AIProvider = 'ollama' | 'huggingface';
-export const DEFAULT_PROVIDER: AIProvider = process.env.NEXT_PUBLIC_AI_PROVIDER as AIProvider || 'ollama';
+export const DEFAULT_PROVIDER: AIProvider = (import.meta.env.VITE_AI_PROVIDER || 'ollama') as AIProvider;
 
 // Ollama API configuration
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-const VISION_MODEL = process.env.NEXT_PUBLIC_OLLAMA_VISION_MODEL || process.env.OLLAMA_VISION_MODEL || 'llama3.2-vision:latest';
+// const OLLAMA_BASE_URL = import.meta.env.VITE_OLLAMA_BASE_URL || 'http://localhost:11434';
+const VISION_MODEL = import.meta.env.VITE_OLLAMA_VISION_MODEL || 'llama3.2-vision:latest';
 
 // Classification categories
 export const CLASSIFICATION_LABELS = [
@@ -91,13 +91,13 @@ export const resizeImageBase64 = (base64Str: string, maxDim: number = 512): Prom
     });
 };
 
-export const classifyImage = async (imageBase64: string, provider: AIProvider = 'ollama'): Promise<ClassificationResult> => {
+export const classifyImage = async (imageBase64: string, _: AIProvider = 'ollama'): Promise<ClassificationResult> => {
     try {
         const { purgeModelsExcept } = await import('./ollama');
         await purgeModelsExcept(VISION_MODEL);
 
         console.log(`[ImageClassifier] Using local ${VISION_MODEL} for classification...`);
-        const fetchClassification = async (retryPrompt: string, ctx: number) => {
+        const fetchClassification = async (retryPrompt: string, _: number) => {
             return await api.fetchWithAuth('/api/ai/ollama-proxy/', {
                 method: 'POST',
                 body: JSON.stringify({

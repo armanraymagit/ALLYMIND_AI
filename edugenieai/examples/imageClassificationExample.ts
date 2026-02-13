@@ -9,7 +9,6 @@ import {
     classifyText,
     isVisionModelAvailable,
     CLASSIFICATION_LABELS,
-    type ClassificationResult,
 } from '../services/imageClassifier';
 
 /**

@@ -14,11 +14,11 @@ import { resizeImageBase64 } from './imageClassifier';
  * @returns Enhanced base64 encoded image
  */
 export const preprocessHandwritingImage = async (imageBase64: string): Promise<string> => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            // Resize image first for performance (max 1024px)
-            const resizedBase64 = await resizeImageBase64(imageBase64, 1024);
+    // Resize image first for performance (max 1024px)
+    const resizedBase64 = await resizeImageBase64(imageBase64, 1024);
 
+    return new Promise((resolve, reject) => {
+        try {
             // Create an image element to load the base64 data
             const img = new Image();
 
@@ -48,8 +48,8 @@ export const preprocessHandwritingImage = async (imageBase64: string): Promise<s
                     // Blue ink appears darker in the red channel, making it more visible
                     for (let i = 0; i < data.length; i += 4) {
                         const red = data[i];
-                        const green = data[i + 1];
-                        const blue = data[i + 2];
+                        // const _green = data[i + 1];
+                        // const _blue = data[i + 2];
 
                         // Use red channel as grayscale value (blue ink is dark in red channel)
                         // This makes blue pen writing appear darker

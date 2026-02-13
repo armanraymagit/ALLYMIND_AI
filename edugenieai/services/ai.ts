@@ -127,7 +127,7 @@ export const enhanceQuizWithImage = async (question: QuizQuestion): Promise<Quiz
     return { ...question, imageUrl: imageUrl || undefined };
 };
 
-export const summarizeLecture = async (content: string, type: 'text' | 'media' = 'text', _mimeType?: string): Promise<string> => {
+export const summarizeLecture = async (content: string, type: 'text' | 'media' = 'text'): Promise<string> => {
     if (type === 'media') {
         return "Media summarization currently requires Gemini. Since Gemini was removed, please paste the transcript text instead to use Ollama.";
     }

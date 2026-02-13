@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { summarizeNotes, extractTextFromImage, classifyImage, trimRepetitionLoop } from '../services/ai';
 import ReactMarkdown from 'react-markdown';
 import { SimpleFileProcessor, ProcessedFile } from '../services/simpleFileProcessor';
@@ -221,7 +221,7 @@ const Summarizer: React.FC<SummarizerProps> = ({ onSummaryGenerated }) => {
                         const title = summary.split('\n')[0].replace(/[#*]/g, '').trim().substring(0, 50) || 'New Summary';
                         await api.saveNote(title, summary);
                         alert('Saved to your notes!');
-                      } catch (e) {
+                      } catch {
                         alert('Failed to save note');
                       }
                     }}
