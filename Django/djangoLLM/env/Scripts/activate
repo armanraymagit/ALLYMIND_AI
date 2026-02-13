@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="D:\AI projects\Backend with django for llm model\Django\env"
+VIRTUAL_ENV="D:\AI projects\fullstackedugenieai\Django\djangoLLM\env"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

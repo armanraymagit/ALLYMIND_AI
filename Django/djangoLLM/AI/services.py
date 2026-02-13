@@ -4,7 +4,7 @@ from .models import TextEmbedding # Import TextEmbedding model
 from pgvector.django import CosineDistance # Import CosineDistance for vector similarity
 
 
-OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://ollama:11434') # 'ollama' is the service name in docker-compose
+OLLAMA_HOST = os.getenv('OLLAMA_HOST', 'http://127.0.0.1:11434') # Default to localhost for local dev
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'llama3.2:latest')
 OLLAMA_VISION_MODEL = os.getenv('OLLAMA_VISION_MODEL', 'llama3.2-vision:latest')
 HUGGINGFACE_API_KEY = os.getenv('HUGGINGFACE_API_KEY')
@@ -48,7 +48,7 @@ def get_ollama_host() -> str:
     return OLLAMA_HOST
 
 import PyPDF2
-import whisper # Import whisper
+# import whisper # Import whisper
 from moviepy import VideoFileClip # Import moviepy
 from PIL import Image # Import PIL for image processing
 import tempfile
@@ -58,33 +58,33 @@ import os
 # This can be resource intensive and might be better handled in a separate process or with a pre-loaded model.
 _whisper_model = None
 
-def get_whisper_model():
-    """
-    Loads the Whisper model. If a CUDA-enabled GPU is available, the model is loaded onto the GPU.
-    Otherwise, it falls back to the CPU.
-    Requires PyTorch to be installed with CUDA support for GPU acceleration.
-    """
-    global _whisper_model
-    if _whisper_model is None:
-        import torch
-        import logging
-
-        logger = logging.getLogger(__name__)
-
-        is_cuda_available = torch.cuda.is_available()
-        logger.info(f"CUDA available: {is_cuda_available}")
-        
-        if not is_cuda_available:
-            logger.warning("CUDA not available. Falling back to CPU for Whisper.")
-            logger.info(f"PyTorch version: {torch.__version__}")
-            logger.info(f"PyTorch CUDA version: {torch.version.cuda}")
-            device = "cpu"
-        else:
-            logger.info("CUDA is available. Loading Whisper model on GPU.")
-            device = "cuda"
-
-        _whisper_model = whisper.load_model("base", device=device)
-    return _whisper_model
+# def get_whisper_model():
+#     """
+#     Loads the Whisper model. If a CUDA-enabled GPU is available, the model is loaded onto the GPU.
+#     Otherwise, it falls back to the CPU.
+#     Requires PyTorch to be installed with CUDA support for GPU acceleration.
+#     """
+#     global _whisper_model
+#     if _whisper_model is None:
+#         import torch
+#         import logging
+# 
+#         logger = logging.getLogger(__name__)
+# 
+#         is_cuda_available = torch.cuda.is_available()
+#         logger.info(f"CUDA available: {is_cuda_available}")
+#         
+#         if not is_cuda_available:
+#             logger.warning("CUDA not available. Falling back to CPU for Whisper.")
+#             logger.info(f"PyTorch version: {torch.__version__}")
+#             logger.info(f"PyTorch CUDA version: {torch.version.cuda}")
+#             device = "cpu"
+#         else:
+#             logger.info("CUDA is available. Loading Whisper model on GPU.")
+#             device = "cuda"
+# 
+#         _whisper_model = whisper.load_model("base", device=device)
+#     return _whisper_model
 
 def extract_text_from_pdf(pdf_file) -> str:
     """
@@ -100,9 +100,10 @@ def transcribe_audio(audio_file_path: str) -> str:
     """
     Transcribes audio from a given file path into text using the Whisper model.
     """
-    model = get_whisper_model()
-    result = model.transcribe(audio_file_path)
-    return result["text"]
+    # model = get_whisper_model()
+    # result = model.transcribe(audio_file_path)
+    # return result["text"]
+    return "Whisper model is currently disabled."
 
 def extract_audio_from_video(video_file_path: str) -> str:
     """
