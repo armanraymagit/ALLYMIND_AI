@@ -1,0 +1,104 @@
+
+name: DevOps Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  frontend-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: edugenieai/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./edugenieai
+        run: npm ci
+
+      - name: Lint Frontend
+        working-directory: ./edugenieai
+        run: npm run lint
+
+      - name: Test Frontend
+        working-directory: ./edugenieai
+        run: npm run test -- --run
+
+  backend-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.1-pg16
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        working-directory: ./Django/djangoLLM
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Backend Tests
+        working-directory: ./Django/djangoLLM
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          OLLAMA_HOST: http://localhost:11434
+        run: |
+          python manage.py test AI
+
+  docker-build:
+    needs: [frontend-check, backend-check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Backend Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./Django/djangoLLM
+          file: ./Django/djangoLLM/Dockerfile
+          push: false
+          tags: edugenie-backend:latest
+
+      - name: Build Frontend Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./edugenieai
+          file: ./edugenieai/Dockerfile
+          push: false
+          tags: edugenie-frontend:latest
