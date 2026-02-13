@@ -42,7 +42,7 @@ const generateText = async (prompt: string, systemPrompt?: string): Promise<stri
 
 /**
  * Generates an image based on a text prompt.
- * Uses fetch directly with absolute URL for binary/blob support if needed, 
+ * Uses fetch directly with absolute URL for binary/blob support if needed,
  * but proxies through backend to avoid CORS.
  */
 export const generateImage = async (prompt: string): Promise<string | null> => {
@@ -88,7 +88,7 @@ export const batchGenerateImages = async (prompts: string[]): Promise<(string | 
  */
 export const generateFlashcards = async (topic: string, content: string, count: number = 8, includeImages: boolean = false): Promise<any[]> => {
     const systemPrompt = "You are a teacher. Create educational flashcards. Return ONLY a JSON array of objects with 'front' and 'back' properties.";
-    const prompt = `Generate ${count} flashcards about: Topic: ${topic}. Context: ${content}. 
+    const prompt = `Generate ${count} flashcards about: Topic: ${topic}. Context: ${content}.
   Return exactly ${count} flashcards in this format: [{"front": "...", "back": "..."}]`;
 
     const text = await generateText(prompt, systemPrompt);

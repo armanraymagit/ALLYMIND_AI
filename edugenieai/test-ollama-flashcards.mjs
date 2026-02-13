@@ -11,7 +11,7 @@ const FALLBACK_MODELS = ['llama3.1', 'llama3.2', 'mistral', 'qwen2.5', 'phi3'];
 
 async function testFlashcardGeneration(model) {
   console.log(`\n🧪 Testing with model: ${model}`);
-  
+
   const jsonSchema = {
     type: 'array',
     items: {
@@ -53,7 +53,7 @@ Return ONLY a JSON array with flashcards.`;
 
     const data = await response.json();
     const parsed = JSON.parse(data.response);
-    
+
     if (Array.isArray(parsed) && parsed.length > 0) {
       console.log(`✅ Success! Generated ${parsed.length} flashcards`);
       console.log('Sample:', JSON.stringify(parsed[0], null, 2));
@@ -72,10 +72,10 @@ async function main() {
   console.log('🚀 Testing Ollama Flashcard Generation');
   console.log(`📍 Ollama URL: ${OLLAMA_BASE_URL}`);
   console.log(`🤖 Primary Model: ${OLLAMA_MODEL}`);
-  
+
   // Test primary model
   let success = await testFlashcardGeneration(OLLAMA_MODEL);
-  
+
   // Try fallback models if primary fails
   if (!success) {
     console.log('\n🔄 Trying fallback models...');
@@ -88,7 +88,7 @@ async function main() {
       }
     }
   }
-  
+
   if (!success) {
     console.log('\n❌ All models failed. Please:');
     console.log('1. Make sure Ollama is running: ollama serve');

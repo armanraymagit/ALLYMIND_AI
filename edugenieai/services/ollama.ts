@@ -46,7 +46,7 @@ export const purgeModelsExcept = async (keepModel: string): Promise<void> => {
     console.log(`[Ollama] Purging VRAM, keeping only: ${keepModel}`);
     const activeModels = await api.fetchWithAuth('/api/ai/ollama-proxy/', {
       method: 'GET',
-      // This is a custom endpoint we might need to handle, but for now we'll assumes 
+      // This is a custom endpoint we might need to handle, but for now we'll assumes
       // the proxy can handle /api/ps or we'll just try to unload common ones.
     }).catch(() => ({ models: [] }));
 
@@ -295,7 +295,7 @@ export const explainConcept = async (
   // Let's UPDATE explainConcept to be more "chatty" if the input doesn't look like a strict concept query.
   // Or better, we expose chatWithAI and update the UI to use it.
 
-  // For this refactor, I will introduce chatWithAI and keep explainConcept specialized for "Explain X" tasks 
+  // For this refactor, I will introduce chatWithAI and keep explainConcept specialized for "Explain X" tasks
   // if we were distinguishing them, but the UI uses 'explainConcept' for the main chat.
   // So I will redirect 'explainConcept' to 'chatWithAI' with a flexible prompt.
 

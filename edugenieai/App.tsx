@@ -282,7 +282,7 @@ const App: React.FC = () => {
 
   // Track time spent on each view
   useEffect(() => {
-    // Only update the state every 10 seconds to reduce re-renders, 
+    // Only update the state every 10 seconds to reduce re-renders,
     // but track every second internally if needed.
     // For now, let's keep the 1s resolution but it's the main perf killer.
     // Optimization: Sync view usage less frequently or on component switch.

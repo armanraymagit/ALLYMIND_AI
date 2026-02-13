@@ -9,7 +9,7 @@ import { resizeImageBase64 } from './imageClassifier';
 /**
  * Preprocess a handwritten image to enhance contrast and readability
  * Specifically optimized for blue pen handwriting on white paper
- * 
+ *
  * @param imageBase64 - Base64 encoded image (with or without data URL prefix)
  * @returns Enhanced base64 encoded image
  */
@@ -117,7 +117,7 @@ export const preprocessHandwritingImage = async (imageBase64: string): Promise<s
 /**
  * Apply a sharpening filter to enhance edges
  * Uses a 3x3 convolution kernel
- * 
+ *
  * @param imageData - ImageData object to sharpen
  * @param width - Image width
  * @param height - Image height
@@ -202,7 +202,7 @@ const applySharpen = (imageData: ImageData, width: number, height: number): Imag
 
 /**
  * Preprocess multiple images for handwriting recognition
- * 
+ *
  * @param imagesBase64 - Array of base64 encoded images
  * @returns Array of enhanced base64 encoded images
  */

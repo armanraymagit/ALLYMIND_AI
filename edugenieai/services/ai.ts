@@ -12,7 +12,7 @@ import { Flashcard, QuizQuestion } from '../types';
  */
 
 export const explainConcept = async (topic: string, context: string = '', onToken?: (token: string) => void): Promise<string> => {
-    // Stick with Ollama for chat to keep it local if possible, 
+    // Stick with Ollama for chat to keep it local if possible,
     // or we could use HF here too. Given user asked for "locally or whatever is best",
     // HF Inference API is often "best" in quality, Ollama is best for "local".
     // I'll keep Ollama as default for the Chatbot (Explainer) since it's already working well.
