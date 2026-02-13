@@ -22,9 +22,19 @@ vi.mock('../services/simpleFileProcessor', () => ({
     }
 }));
 
+vi.mock('../services/api', () => ({
+    api: {
+        getSummaryFromBackend: vi.fn(() => Promise.reject(new Error('Test fallback'))),
+        saveNote: vi.fn(() => Promise.resolve()),
+        fetchWithAuth: vi.fn(),
+    }
+}));
+
 describe('Summarizer Component', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // Silence noise from the intentional API fallback warning
+        vi.spyOn(console, 'warn').mockImplementation(() => { });
     });
 
     it('renders correctly', () => {

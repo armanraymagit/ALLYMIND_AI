@@ -11,6 +11,13 @@ vi.mock('../services/ollama', () => ({
   classifyImage: vi.fn(() => Promise.resolve({ label: 'Other', confidence: 'medium' as const })),
   classifyMultipleImages: vi.fn(() => Promise.resolve([])),
   classifyText: vi.fn(() => Promise.resolve({ label: 'Other', confidence: 'medium' as const })),
+  preloadModel: vi.fn(() => Promise.resolve()),
+  preloadTextModel: vi.fn(() => Promise.resolve()),
+  preloadVisionModel: vi.fn(() => Promise.resolve()),
+  unloadModel: vi.fn(() => Promise.resolve()),
+  summarizeImage: vi.fn(() => Promise.resolve('')),
+  extractTextFromImage: vi.fn(() => Promise.resolve('')),
+  trimRepetitionLoop: vi.fn((text) => text),
 }));
 
 vi.mock('../services/huggingface', () => ({
