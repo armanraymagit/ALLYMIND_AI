@@ -33,6 +33,6 @@ fi
 echo "Collecting static files..."
 python3 manage.py collectstatic --noinput || true
 
-# Start Django development server
-echo "Starting Django server..."
-exec python3 manage.py runserver 0.0.0.0:8000
+# Start Gunicorn WSGI server
+echo "Starting Gunicorn server..."
+exec gunicorn djangoLLM.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120

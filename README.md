@@ -75,6 +75,9 @@ Ensure you have a `.env` file in the backend directory with following:
 
 *   **Pre-commit Hooks**: Installed automatically (run `pre-commit run --all-files` manually).
 *   **CI Pipeline**: GitHub Actions automatically runs lints, tests, and Docker builds on push to `main`.
+*   **Deployment Pipeline**:
+    *   **Docker/VPS**: Use `.github/workflows/deploy.yml` with `DOCKER_HUB_USERNAME`, `DOCKER_HUB_TOKEN`, `DEPLOY_HOST`, `DEPLOY_USER`, and `DEPLOY_SSH_KEY` secrets.
+    *   **Railway**: Use `.github/workflows/railway.yml` with `RAILWAY_FRONTEND_TOKEN` and `RAILWAY_BACKEND_TOKEN`.
 
 ## 📄 License
 

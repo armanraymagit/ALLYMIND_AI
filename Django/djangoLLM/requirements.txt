@@ -5,8 +5,6 @@ djangorestframework-simplejwt
 PyJWT
 pytz
 sqlparse
-psycopg2-binary
-pgvector
 python-dotenv
 PyPDF2
 # openai-whisper
@@ -14,7 +12,9 @@ moviepy
 ollama
 requests
 Pillow
-gunicorn
+psycopg2-binary
+pgvector
 psutil
 httpx
 pydantic
+gunicorn

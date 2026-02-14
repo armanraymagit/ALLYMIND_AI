@@ -16,8 +16,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.http import JsonResponse
+
+
+def api_root(request):
+    return JsonResponse(
+        {
+            "message": "EduGenie AI Backend API",
+            "version": "1.0",
+            "endpoints": ["/api/ai/", "/admin/"],
+        }
+    )
+
 
 urlpatterns = [
+    path("", api_root),
     path("admin/", admin.site.urls),
     path("api/ai/", include("AI.urls")),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

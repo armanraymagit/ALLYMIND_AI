@@ -24,7 +24,6 @@ from .services import (
     get_ollama_host,
     classify_image,
 )
-from pgvector.django import CosineDistance, L2Distance
 from rest_framework.parsers import MultiPartParser, FormParser
 import os  # Import os for file handling
 import tempfile  # Import tempfile for temporary file creation

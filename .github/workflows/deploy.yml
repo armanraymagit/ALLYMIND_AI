@@ -1,0 +1,58 @@
+name: Production Deployment
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test-and-lint:
+    uses: ./.github/workflows/devops.yml
+    # This assumes we refactor devops.yml to be reusable or just run it independently.
+    # For now, let's just make deploy.yml a self-contained production pipeline.
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: [test-and-lint] # Only deploy if CI passes
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./Django/djangoLLM
+          file: ./Django/djangoLLM/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-backend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-backend:${{ github.sha }}
+
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./edugenieai
+          file: ./edugenieai/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-frontend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-frontend:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    steps:
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ~/fullstackedugenieai
+            docker compose pull
+            docker compose up -d
+            docker system prune -f
