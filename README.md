@@ -1,53 +1,96 @@
-# TECHBRO AI: Full-Stack AI Study Buddy
+# 🤖 TECHBRO AI: The Ultimate Full-Stack Study Buddy
 
-TECHBRO AI is a powerful, full-stack application designed to help students transform dense study materials into easy-to-digest summaries, quizzes, and flashcards. It leverages local and remote AI models to provide a private and efficient learning experience.
+![TECHBRO Logo](file:///d:/AI%20projects/fullstackedugenieai/techbroai/public/techbro_logo.png)
+
+TECHBRO AI is a state-of-the-art, full-stack application designed to revolutionize the way students interact with their study materials. By leveraging advanced local and remote AI models, it transforms dense notes, complex PDFs, and even images into interactive study tools like summaries, quizzes, and flashcards.
+
+---
 
 ## 🚀 Key Features
 
-*   **Note Summarizer**: Convert long PDFs, images of notes, or text into concise bullet points.
-*   **Quiz & Flashcard Generation**: Automatically generate study aids from your materials.
-*   **Ollama Integration**: Uses local LLMs (Llama 3.2, Qwen) for privacy and speed.
-*   **Hybrid RAG**: Intelligent retrieval-augmented generation for chatting with your notes.
-*   **Image Classification**: Automatically categorizes academic content (Math, Physics, etc.).
-*   **Dashboard & Progress Tracking**: Monitor your study time and note-taking habits.
+### 💡 AI Explainer (Study Chatbot)
+Stuck on a difficult concept? Our AI Study Buddy provides clear, analogy-rich explanations.
+- **Tech-Focused Suggestions**: Ready-to-go questions on Big O notation, Event Loops, TCP/UDP, and more.
+- **Hybrid Backend**: Seamlessly toggles between a custom Django backend and a local Ollama proxy for maximum availability.
 
-## 🏗️ Architecture
+### 📄 Note Summarizer
+Upload PDFs, images, or paste text to get instant, high-quality summaries.
+- **Multi-Format Support**: Handles .pdf, .jpg, .png, and plain text.
+- **Vision Integration**: Uses Qwen2.5-VL for accurate text extraction from images.
 
-The project is structured as a monorepo consisting of:
+### 🎴 Flashcard Master
+Transform any topic or set of notes into a deck of interactive flashcards.
+- **AI-Powered Generation**: Automatically creates questions and answers based on your specific content.
+- **Lazy Image Loading**: Enhances flashcards with relevant AI-generated imagery for better retention.
 
-*   **`techbroai/`**: A modern React + Vite frontend styled with Tailwind CSS and Framer Motion for smooth animations.
-*   **`Django/djangoLLM/`**: A robust Django REST Framework backend handling AI orchestration, vector database (pgvector), and user management.
-*   **DevOps Ready**: Integrated with Docker, CI/CD pipelines (GitHub Actions), and pre-commit hooks for high-quality code.
+### ✅ Quiz Master
+Test your knowledge with automatically generated quizzes.
+- **Real-Time Feedback**: Get instant scores and explanations for every answer.
+- **Context-Aware**: Quizzes are tailored to the exact difficulty and scope of your study materials.
 
-## 🛠️ Tech Stack
+### 📊 Performance Dashboard
+Monitor your learning journey with data-driven insights.
+- **Study Time Tracking**: High-precision tracking of time spent per feature.
+- **Activity Visualization**: Weekly BarCharts showing your study habits in hours and minutes.
 
-*   **Frontend**: React (19), Vite, Tailwind CSS, Recharts, Framer Motion.
-*   **Backend**: Django, DRF, PostgreSQL + pgvector, PyPDF2, MoviePy.
-*   **AI/ML**: Ollama (Llama 3.2, Qwen), Hugging Face Inference API.
-*   **DevOps**: Docker, Docker Compose, GitHub Actions, Pre-commit.
+---
 
-## 🚦 Getting Started
+## 🏗️ Technical Architecture
 
-### Prerequisites
+TECHBRO AI is built with a modern, scalable architecture designed for high performance and AI efficiency.
 
-*   **Docker & Docker Compose**
-*   **Ollama** (running locally on host)
-*   **Node.js & Python 3.11** (for local development)
-
-### Quick Start with Docker
-
-The easiest way to run the full project is using Docker Compose:
-
-```bash
-docker compose up --build
+```mermaid
+graph TD
+    A[React Frontend] -->|REST API| B[Django Backend]
+    A -->|Direct Proxy| C[Ollama Local LLM]
+    B -->|AI Orchestration| D[Hugging Face / OpenAI]
+    B -->|Vector Search| E[PostgreSQL + pgvector]
+    B -->|Local Inference| C
+    B -->|Storage| F[Local Filesystem]
 ```
 
-*   **Frontend**: [http://localhost:3000](http://localhost:3000)
-*   **Backend**: [http://localhost:8000](http://localhost:8000)
+### Hybrid RAG (Retrieval-Augmented Generation)
+- **Vector Database**: Uses `pgvector` for efficient similarity searches across your indexed notes.
+- **Intelligent Context**: Automatically injects relevant snippets from your previous notes into AI conversations for personalized assistance.
 
-### Local Development
+---
 
-#### Backend Setup
+## 🛠️ Stack & Infrastructure
+
+- **Frontend**: React 19, Vite, Tailwind CSS, Recharts, Framer Motion.
+- **Backend**: Django 5.2+, Django REST Framework, PostgreSQL + pgvector.
+- **AI Models**: 
+  - **Text**: Llama 3.2 (via Ollama)
+  - **Vision**: Qwen2.5-VL / Llama 3.2 Vision
+  - **Embeddings**: Nomic-Embed-Text
+- **DevOps**: Docker & Compose, GitHub Actions CI/CD, Pre-commit Hooks (Black, ESLint).
+
+---
+
+## 🚦 Installation & Setup
+
+### Prerequisites
+- **Docker Desktop** (with WSL2 backend for Windows)
+- **Ollama** installed on the host machine
+- **Python 3.11+** and **Node.js 22+** (for non-docker development)
+
+### Quick Start (Docker)
+1. **Clone the Repo**:
+   ```bash
+   git clone https://github.com/armanraymagit/TECHBRO_AI.git
+   cd TECHBRO_AI
+   ```
+2. **Environment Setup**:
+   Copy `.env.docker` to `Django/djangoLLM/.env` and fill in necessary API keys.
+3. **Launch**:
+   ```bash
+   docker compose up --build
+   ```
+   Access at `http://localhost:3000`
+
+### Local Development Setup
+
+#### Backend
 ```bash
 cd Django/djangoLLM
 python -m venv env
@@ -57,28 +100,35 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-#### Frontend Setup
+#### Frontend
 ```bash
 cd techbroai
 npm install
 npm run dev
 ```
 
-## ⚙️ Configuration
+---
 
-Ensure you have a `.env` file in the backend directory with following:
-- `OLLAMA_HOST`: Defaults to `http://127.0.0.1:11434`
-- `HUGGINGFACE_API_KEY`: Required for some vision features.
-- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`: For local DB connection.
+## ⚙️ Environment Variables
 
-## 🧪 CI/CD & DevOps
+Required variables in `Django/djangoLLM/.env`:
+- `OLLAMA_HOST`: `http://host.docker.internal:11434` (Docker) or `http://127.0.0.1:11434` (Local)
+- `HUGGINGFACE_API_KEY`: For remote vision/extraction model fallback.
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`: Database credentials.
 
-*   **Pre-commit Hooks**: Installed automatically (run `pre-commit run --all-files` manually).
-*   **CI Pipeline**: GitHub Actions automatically runs lints, tests, and Docker builds on push to `main`.
-*   **Deployment Pipeline**:
-    *   **Docker/VPS**: Use `.github/workflows/deploy.yml` with `DOCKER_HUB_USERNAME`, `DOCKER_HUB_TOKEN`, `DEPLOY_HOST`, `DEPLOY_USER`, and `DEPLOY_SSH_KEY` secrets.
-    *   **Railway**: Use `.github/workflows/railway.yml` with `RAILWAY_FRONTEND_TOKEN` and `RAILWAY_BACKEND_TOKEN`.
+---
+
+## 🧪 CI/CD & Quality Control
+
+TECHBRO AI maintains high code quality through automated pipelines:
+- **Linting**: ESLint for JS/TS, Black for Python.
+- **Testing**: Vitest for frontend, Django Test for backend.
+- **Pipeline**: GitHub Actions (`devops.yml`) runs on every push to ensure builds are stable.
+- **Deployment**: Automatic Docker image builds and deployment via `deploy.yml`.
+
+---
 
 ## 📄 License
-
 This project is licensed under a Private Proprietary License. See the [LICENSE](file:///d:/AI projects/fullstackedugenieai/LICENSE) file for details.
+
+© 2026 TECHBRO AI. All Rights Reserved.
