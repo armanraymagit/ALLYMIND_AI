@@ -21,14 +21,14 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: edugenieai/package-lock.json
+          cache-dependency-path: techbroai/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./edugenieai
+        working-directory: ./techbroai
         run: npm ci
 
       - name: Lint Frontend
-        working-directory: ./edugenieai
+        working-directory: ./techbroai
         run: npm run lint
 
       - name: Test Frontend
@@ -99,7 +99,7 @@ jobs:
       - name: Build Frontend Image
         uses: docker/build-push-action@v4
         with:
-          context: ./edugenieai
-          file: ./edugenieai/Dockerfile
+          context: ./techbroai
+          file: ./techbroai/Dockerfile
           push: false
           tags: edugenie-frontend:latest

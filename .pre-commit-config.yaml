@@ -1,3 +1,4 @@
+exclude: ^.*/staticfiles/.*$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -7,6 +8,7 @@ repos:
         exclude: ^.*\.(min\.js|min\.css|map|svg|json)$
       - id: check-yaml
       - id: check-added-large-files
+        args: [--maxkb=1024]
 
   - repo: https://github.com/psf/black
     rev: 23.3.0

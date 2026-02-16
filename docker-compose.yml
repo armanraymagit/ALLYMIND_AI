@@ -51,7 +51,7 @@ services:
   # Frontend Service (Vite + Nginx)
   frontend:
     build:
-      context: ./edugenieai
+      context: ./techbroai
       dockerfile: Dockerfile
     ports:
       - "3000:80"

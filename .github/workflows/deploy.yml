@@ -36,8 +36,8 @@ jobs:
       - name: Build and Push Frontend
         uses: docker/build-push-action@v4
         with:
-          context: ./edugenieai
-          file: ./edugenieai/Dockerfile
+          context: ./techbroai
+          file: ./techbroai/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-frontend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-frontend:${{ github.sha }}
 

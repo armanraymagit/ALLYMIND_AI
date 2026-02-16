@@ -24,7 +24,7 @@ from django.http import JsonResponse
 def api_root(request):
     return JsonResponse(
         {
-            "message": "EduGenie AI Backend API",
+            "message": "TECHBRO AI Backend API",
             "version": "1.0",
             "endpoints": ["/api/ai/", "/admin/"],
         }

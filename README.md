@@ -1,6 +1,6 @@
-# EduGenie AI: Full-Stack AI Study Buddy
+# TECHBRO AI: Full-Stack AI Study Buddy
 
-EduGenie AI is a powerful, full-stack application designed to help students transform dense study materials into easy-to-digest summaries, quizzes, and flashcards. It leverages local and remote AI models to provide a private and efficient learning experience.
+TECHBRO AI is a powerful, full-stack application designed to help students transform dense study materials into easy-to-digest summaries, quizzes, and flashcards. It leverages local and remote AI models to provide a private and efficient learning experience.
 
 ## 🚀 Key Features
 
@@ -15,7 +15,7 @@ EduGenie AI is a powerful, full-stack application designed to help students tran
 
 The project is structured as a monorepo consisting of:
 
-*   **`edugenieai/`**: A modern React + Vite frontend styled with Tailwind CSS and Framer Motion for smooth animations.
+*   **`techbroai/`**: A modern React + Vite frontend styled with Tailwind CSS and Framer Motion for smooth animations.
 *   **`Django/djangoLLM/`**: A robust Django REST Framework backend handling AI orchestration, vector database (pgvector), and user management.
 *   **DevOps Ready**: Integrated with Docker, CI/CD pipelines (GitHub Actions), and pre-commit hooks for high-quality code.
 
@@ -59,7 +59,7 @@ python manage.py runserver
 
 #### Frontend Setup
 ```bash
-cd edugenieai
+cd techbroai
 npm install
 npm run dev
 ```
@@ -81,4 +81,4 @@ Ensure you have a `.env` file in the backend directory with following:
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under a Private Proprietary License. See the [LICENSE](file:///d:/AI projects/fullstackedugenieai/LICENSE) file for details.
