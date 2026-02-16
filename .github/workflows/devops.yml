@@ -20,27 +20,27 @@ jobs:
   frontend-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: techbroai/package-lock.json
+          cache-dependency-path: allymindai/package-lock.json
 
       - name: Install dependencies
-        working-directory: ./techbroai
+        working-directory: ./allymindai
         run: npm ci
 
       - name: Lint Frontend
-        working-directory: ./techbroai
+        working-directory: ./allymindai
         run: npm run lint
 
       - name: Test Frontend
-        working-directory: ./techbroai
+        working-directory: ./allymindai
         run: npm run test -- --run
 
   backend-check:
@@ -61,13 +61,14 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: Django/djangoLLM/requirements.txt
 
       - name: Install Dependencies
         working-directory: ./Django/djangoLLM
@@ -91,7 +92,7 @@ jobs:
     needs: [frontend-check, backend-check]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -102,12 +103,12 @@ jobs:
           context: ./Django/djangoLLM
           file: ./Django/djangoLLM/Dockerfile
           push: false
-          tags: techbro-backend:latest
+          tags: allymind-backend:latest
 
       - name: Build Frontend Image
         uses: docker/build-push-action@v4
         with:
-          context: ./techbroai
-          file: ./techbroai/Dockerfile
+          context: ./allymindai
+          file: ./allymindai/Dockerfile
           push: false
-          tags: techbro-frontend:latest
+          tags: allymind-frontend:latest

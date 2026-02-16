@@ -1,7 +1,6 @@
 # 🤖 ALLYMIND AI: The Ultimate Full-Stack Study Buddy
 
 
-
 ALLYMIND AI is a state-of-the-art, full-stack application designed to revolutionize the way students interact with their study materials. By leveraging advanced local and remote AI models, it transforms dense notes, complex PDFs, and even images into interactive study tools like summaries, quizzes, and flashcards.
 
 ---

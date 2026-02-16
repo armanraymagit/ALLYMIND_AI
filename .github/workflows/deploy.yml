@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test-and-lint] # Only deploy if CI passes
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -35,15 +35,15 @@ jobs:
           context: ./Django/djangoLLM
           file: ./Django/djangoLLM/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/techbro-backend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/techbro-backend:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/allymind-backend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/allymind-backend:${{ github.sha }}
 
       - name: Build and Push Frontend
         uses: docker/build-push-action@v4
         with:
-          context: ./techbroai
-          file: ./techbroai/Dockerfile
+          context: ./allymindai
+          file: ./allymindai/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/techbro-frontend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/techbro-frontend:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/allymind-frontend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/allymind-frontend:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
