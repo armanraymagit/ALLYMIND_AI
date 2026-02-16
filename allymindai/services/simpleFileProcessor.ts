@@ -3,7 +3,8 @@ import * as pdfjsLib from 'pdfjs-dist';
 
 // Configure worker for pdfjs
 
-const workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+// Configure worker for pdfjs to use CDN to avoid MIME type issues
+const workerSrc = 'https://unpkg.com/pdfjs-dist@5.4.624/build/pdf.worker.mjs';
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
 export interface ProcessedFile {

@@ -1,6 +1,9 @@
+name: allymind
+
 services:
   # Database Service
   db:
+    container_name: allymind-db
     image: pgvector/pgvector:0.8.1-pg16
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -18,6 +21,7 @@ services:
 
   # Backend Service (Django)
   backend:
+    container_name: allymind-backend
     build:
       context: ./Django/djangoLLM
       dockerfile: Dockerfile
@@ -50,8 +54,9 @@ services:
 
   # Frontend Service (Vite + Nginx)
   frontend:
+    container_name: allymind-frontend
     build:
-      context: ./techbroai
+      context: ./allymindai
       dockerfile: Dockerfile
     ports:
       - "3000:80"

@@ -24,7 +24,7 @@ from django.http import JsonResponse
 def api_root(request):
     return JsonResponse(
         {
-            "message": "TECHBRO AI Backend API",
+            "message": "ALLYMIND AI Backend API",
             "version": "1.0",
             "endpoints": ["/api/ai/", "/admin/"],
         }

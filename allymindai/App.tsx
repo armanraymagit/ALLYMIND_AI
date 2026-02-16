@@ -18,7 +18,7 @@ const ViewLoading = () => (
   <div className="flex-1 flex items-center justify-center min-h-[400px]">
     <div className="flex flex-col items-center space-y-4">
       <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-slate-500 font-medium animate-pulse">Waking up TECHBRO...</p>
+      <p className="text-slate-500 font-medium animate-pulse">Waking up ALLYMIND...</p>
     </div>
   </div>
 );
@@ -129,12 +129,12 @@ const MobileHeader: React.FC<{
     <>
       <header className="lg:hidden h-16 bg-white border-b flex items-center justify-between px-4 sticky top-0 z-50">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white p-1.5 overflow-hidden">
-            <img src="/techbro_logo.png" alt="Logo" className="w-full h-full object-contain" />
+          <div className="w-10 h-10 bg-transparent rounded-lg flex items-center justify-center overflow-hidden">
+            <img src="/allymind_logo.png" alt="Logo" className="w-full h-full object-cover scale-125" />
           </div>
           <div className="flex flex-col">
             <span className="font-display font-bold text-base text-indigo-900 leading-tight">
-              TECHBRO
+              ALLYMIND
             </span>
             <span className="text-[10px] font-mono font-bold text-indigo-500 leading-tight uppercase">
               {formatTime(studySeconds)}
@@ -206,7 +206,7 @@ const Footer: React.FC = () => {
   );
 };
 
-const STORAGE_KEY = 'techbro_study_data_v1';
+const STORAGE_KEY = 'allymind_study_data_v1';
 
 const INITIAL_CHART_DATA = [
   { name: 'Mon', hours: 0 },
@@ -257,20 +257,23 @@ const App: React.FC = () => {
     try {
       const backendStats = await api.getStudyStats();
       if (Array.isArray(backendStats)) {
-        // Update stats
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const today = days[new Date().getDay()];
+        const todayDate = new Date().toISOString().split('T')[0];
+
+        // Get current session data for today before overwriting
+        const currentTodayEntry = chartData.find(d => d.name === today);
+        const currentTodaySeconds = currentTodayEntry ? (currentTodayEntry.hours || 0) * 3600 : 0;
+
+        // Calculate total from backend
         const totals = backendStats.reduce((acc: any, curr: any) => {
           acc.studySeconds += curr.duration;
           return acc;
         }, { studySeconds: 0 });
 
-        setStats((prev: any) => ({
-          ...prev,
-          studySeconds: totals.studySeconds
-        }));
-
-        // Update chart data
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        // Build new chart data from backend
         const newChartData = [...INITIAL_CHART_DATA];
+        let backendTodaySeconds = 0;
 
         backendStats.forEach((entry: any) => {
           const date = new Date(entry.date);
@@ -278,15 +281,32 @@ const App: React.FC = () => {
           const chartEntry = newChartData.find(d => d.name.startsWith(dayName.substring(0, 3)));
           if (chartEntry) {
             chartEntry.hours = parseFloat((entry.duration / 3600).toFixed(4));
+            // Track today's backend value
+            if (entry.date === todayDate) {
+              backendTodaySeconds = entry.duration;
+            }
           }
         });
 
+        // Merge: if current session has more time than backend for today, keep the higher value
+        const todayEntry = newChartData.find(d => d.name === today);
+        if (todayEntry && currentTodaySeconds > backendTodaySeconds) {
+          todayEntry.hours = parseFloat((currentTodaySeconds / 3600).toFixed(4));
+        }
+
+        // Calculate true total from chart (backend + any extra session time)
+        const chartTotal = newChartData.reduce((sum, day) => sum + (day.hours || 0) * 3600, 0);
+
         setChartData(newChartData);
+        setStats((prev: any) => ({
+          ...prev,
+          studySeconds: Math.round(chartTotal)
+        }));
       }
     } catch (error) {
       console.warn('Failed to sync data from backend:', error);
     }
-  }, []);
+  }, [chartData]);
 
   const syncStudyTimeToBackend = React.useCallback(async (seconds: number) => {
     if (!isAuthenticated) return;

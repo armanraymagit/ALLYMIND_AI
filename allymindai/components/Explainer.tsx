@@ -19,7 +19,7 @@ const SUGGESTIONS = [
 
 const Explainer: React.FC<ExplainerProps> = ({ onInteraction }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: "Hi! I'm TECHBRO, your AI Study Buddy. I can explain any concept, simplify your notes, or help you brainstorm ideas. What are we learning today?" }
+    { role: 'assistant', content: "Hi! I'm ALLYMIND, your AI Study Buddy. I can explain any concept, simplify your notes, or help you brainstorm ideas. What are we learning today?" }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);

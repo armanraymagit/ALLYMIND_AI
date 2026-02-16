@@ -46,10 +46,12 @@ const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
                 <div className="p-8">
                     <div className="text-center mb-6">
                         <div className="w-full flex justify-center mb-4">
-                            <img src="/techbro_logo.png" alt="TECHBRO Logo" className="w-24 h-24 object-contain rounded-[2rem] shadow-md" />
+                            <div className="w-24 h-24 rounded-[2.5rem] shadow-xl overflow-hidden flex items-center justify-center bg-transparent">
+                                <img src="/allymind_logo.png" alt="ALLYMIND Logo" className="w-full h-full object-cover scale-150" />
+                            </div>
                         </div>
                         <h1 className="text-3xl font-display font-bold text-slate-900 mb-1">
-                            TECHBRO <span className="text-indigo-600">AI</span>
+                            ALLYMIND <span className="text-indigo-600">AI</span>
                         </h1>
                         <p className="text-slate-500 font-medium text-sm">Your personal AI study companion</p>
                     </div>
@@ -170,7 +172,7 @@ const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
                     </div>
 
                     <p className="mt-8 text-center text-slate-300 text-xs font-medium">
-                        Protected by TECHBRO Security System
+                        Protected by ALLYMIND Security System
                     </p>
                 </div>
             </div>

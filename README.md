@@ -1,8 +1,8 @@
-# 🤖 TECHBRO AI: The Ultimate Full-Stack Study Buddy
+# 🤖 ALLYMIND AI: The Ultimate Full-Stack Study Buddy
 
-![TECHBRO Logo](file:///d:/AI%20projects/fullstackedugenieai/techbroai/public/techbro_logo.png)
+![ALLYMIND Logo](file:///d:/AI%20projects/fullstackedugenieai/allymindai/public/allymind_logo.png)
 
-TECHBRO AI is a state-of-the-art, full-stack application designed to revolutionize the way students interact with their study materials. By leveraging advanced local and remote AI models, it transforms dense notes, complex PDFs, and even images into interactive study tools like summaries, quizzes, and flashcards.
+ALLYMIND AI is a state-of-the-art, full-stack application designed to revolutionize the way students interact with their study materials. By leveraging advanced local and remote AI models, it transforms dense notes, complex PDFs, and even images into interactive study tools like summaries, quizzes, and flashcards.
 
 ---
 
@@ -37,7 +37,7 @@ Monitor your learning journey with data-driven insights.
 
 ## 🏗️ Technical Architecture
 
-TECHBRO AI is built with a modern, scalable architecture designed for high performance and AI efficiency.
+ALLYMIND AI is built with a modern, scalable architecture designed for high performance and AI efficiency.
 
 ```mermaid
 graph TD
@@ -77,8 +77,8 @@ graph TD
 ### Quick Start (Docker)
 1. **Clone the Repo**:
    ```bash
-   git clone https://github.com/armanraymagit/TECHBRO_AI.git
-   cd TECHBRO_AI
+   git clone https://github.com/armanraymagit/ALLYMIND_AI.git
+   cd ALLYMIND_AI
    ```
 2. **Environment Setup**:
    Copy `.env.docker` to `Django/djangoLLM/.env` and fill in necessary API keys.
@@ -102,7 +102,7 @@ python manage.py runserver
 
 #### Frontend
 ```bash
-cd techbroai
+cd allymindai
 npm install
 npm run dev
 ```
@@ -120,7 +120,7 @@ Required variables in `Django/djangoLLM/.env`:
 
 ## 🧪 CI/CD & Quality Control
 
-TECHBRO AI maintains high code quality through automated pipelines:
+ALLYMIND AI maintains high code quality through automated pipelines:
 - **Linting**: ESLint for JS/TS, Black for Python.
 - **Testing**: Vitest for frontend, Django Test for backend.
 - **Pipeline**: GitHub Actions (`devops.yml`) runs on every push to ensure builds are stable.
@@ -136,4 +136,4 @@ TECHBRO AI maintains high code quality through automated pipelines:
 
 Author: **arman**
 
-© 2026 TECHBRO AI. All Rights Reserved.
+© 2026 ALLYMIND AI. All Rights Reserved.

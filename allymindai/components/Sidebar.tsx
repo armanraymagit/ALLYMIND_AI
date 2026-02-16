@@ -101,11 +101,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout, s
     <aside className="fixed inset-y-0 left-0 w-64 bg-white border-r hidden lg:flex flex-col z-30">
       <div className="p-6">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-24 h-24 bg-indigo-600 rounded-3xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 p-4 overflow-hidden">
-            <img src="/techbro_logo.png" alt="Logo" className="w-full h-full object-contain" />
+          <div className="w-24 h-24 bg-transparent rounded-3xl flex items-center justify-center shadow-lg shadow-indigo-100 overflow-hidden">
+            <img src="/allymind_logo.png" alt="Logo" className="w-full h-full object-cover scale-110" />
           </div>
           <h1 className="text-2xl font-display font-bold text-indigo-900 tracking-tight">
-            TECHBRO
+            ALLYMIND
           </h1>
         </div>
       </div>

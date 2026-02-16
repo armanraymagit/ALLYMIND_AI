@@ -263,7 +263,7 @@ export const chatWithAI = async (
     options: {
       temperature: 0.8, // Slightly higher for creativity in chat
     },
-    system: "You are TECHBRO, a friendly and helpful AI study companion. Engage in natural conversation, answer questions clearly, and help the user learn."
+    system: "You are ALLYMIND, a friendly and helpful AI study companion. Engage in natural conversation, answer questions clearly, and help the user learn."
   };
 
   if (onToken) {
