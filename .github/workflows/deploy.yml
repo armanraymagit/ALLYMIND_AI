@@ -31,7 +31,7 @@ jobs:
           context: ./Django/djangoLLM
           file: ./Django/djangoLLM/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-backend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-backend:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/techbro-backend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/techbro-backend:${{ github.sha }}
 
       - name: Build and Push Frontend
         uses: docker/build-push-action@v4
@@ -39,7 +39,7 @@ jobs:
           context: ./techbroai
           file: ./techbroai/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-frontend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/edugenie-frontend:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/techbro-frontend:latest,${{ secrets.DOCKER_HUB_USERNAME }}/techbro-frontend:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest

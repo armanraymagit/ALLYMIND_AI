@@ -32,7 +32,7 @@ jobs:
         run: npm run lint
 
       - name: Test Frontend
-        working-directory: ./edugenieai
+        working-directory: ./techbroai
         run: npm run test -- --run
 
   backend-check:
@@ -94,7 +94,7 @@ jobs:
           context: ./Django/djangoLLM
           file: ./Django/djangoLLM/Dockerfile
           push: false
-          tags: edugenie-backend:latest
+          tags: techbro-backend:latest
 
       - name: Build Frontend Image
         uses: docker/build-push-action@v4
@@ -102,4 +102,4 @@ jobs:
           context: ./techbroai
           file: ./techbroai/Dockerfile
           push: false
-          tags: edugenie-frontend:latest
+          tags: techbro-frontend:latest
