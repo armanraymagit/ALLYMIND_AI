@@ -59,7 +59,7 @@ graph TD
 
 - **Frontend**: React 19, Vite, Tailwind CSS, Recharts, Framer Motion.
 - **Backend**: Django 5.2+, Django REST Framework, PostgreSQL + pgvector.
-- **AI Models**: 
+- **AI Models**:
   - **Text**: Llama 3.2 (via Ollama)
   - **Vision**: Qwen2.5-VL / Llama 3.2 Vision
   - **Embeddings**: Nomic-Embed-Text
@@ -129,6 +129,8 @@ TECHBRO AI maintains high code quality through automated pipelines:
 ---
 
 ## 📄 License
-This project is licensed under a Private Proprietary License. See the [LICENSE](file:///d:/AI projects/fullstackedugenieai/LICENSE) file for details.
+This project is licensed under a Private Proprietary License. See the [LICENSE](./LICENSE) file for details.
+
+Author: **arman**
 
 © 2026 TECHBRO AI. All Rights Reserved.
