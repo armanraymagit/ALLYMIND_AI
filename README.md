@@ -129,7 +129,10 @@ TECHBRO AI maintains high code quality through automated pipelines:
 ---
 
 ## 📄 License
-This project is licensed under a Private Proprietary License. See the [LICENSE](./LICENSE) file for details.
+
+> [!IMPORTANT]
+> This project is licensed under a **Private Proprietary License**.
+> Access and use are restricted. See the [LICENSE](./LICENSE) file for the full legal terms.
 
 Author: **arman**
 
