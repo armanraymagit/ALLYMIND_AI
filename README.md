@@ -1,6 +1,6 @@
 # 🤖 TECHBRO AI: The Ultimate Full-Stack Study Buddy
 
-![TECHBRO Logo](file:///d:/AI%20projects/fullstackedugenieai/techbroai/public/techbro_logo.png)
+
 
 TECHBRO AI is a state-of-the-art, full-stack application designed to revolutionize the way students interact with their study materials. By leveraging advanced local and remote AI models, it transforms dense notes, complex PDFs, and even images into interactive study tools like summaries, quizzes, and flashcards.
 
@@ -137,3 +137,4 @@ TECHBRO AI maintains high code quality through automated pipelines:
 Author: **arman**
 
 © 2026 TECHBRO AI. All Rights Reserved.
+
