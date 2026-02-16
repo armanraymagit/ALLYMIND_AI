@@ -199,7 +199,7 @@ const Footer: React.FC = () => {
     <footer className="mt-auto border-t bg-white py-4 px-4 md:px-8">
       <div className="max-w-6xl mx-auto flex justify-center items-center text-sm text-slate-600">
         <p>
-          © 2026 <span className="font-semibold text-indigo-600">Arman</span>. All rights reserved.
+          © 2026 <span className="font-semibold text-indigo-600">ALLYMIND AI</span>. All rights reserved.
         </p>
       </div>
     </footer>
