@@ -265,11 +265,6 @@ const App: React.FC = () => {
         const currentTodayEntry = chartData.find(d => d.name === today);
         const currentTodaySeconds = currentTodayEntry ? (currentTodayEntry.hours || 0) * 3600 : 0;
 
-        // Calculate total from backend
-        const totals = backendStats.reduce((acc: any, curr: any) => {
-          acc.studySeconds += curr.duration;
-          return acc;
-        }, { studySeconds: 0 });
 
         // Build new chart data from backend
         const newChartData = [...INITIAL_CHART_DATA];
