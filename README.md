@@ -15,7 +15,7 @@ Stuck on a difficult concept? Our AI Study Buddy provides clear, analogy-rich ex
 ### 📄 Note Summarizer
 Upload PDFs, images, or paste text to get instant, high-quality summaries.
 - **Multi-Format Support**: Handles .pdf, .jpg, .png, and plain text.
-- **Vision Integration**: Uses Qwen2.5-VL for accurate text extraction from images.
+- **Vision Integration**: Uses llama3.2 vl for accurate text extraction from images.
 
 ### 🎴 Flashcard Master
 Transform any topic or set of notes into a deck of interactive flashcards.
@@ -84,5 +84,6 @@ ALLYMIND AI maintains high code quality through automated pipelines:
 Author: **arman**
 
 © 2026 ALLYMIND AI. All Rights Reserved.
+
 
 
