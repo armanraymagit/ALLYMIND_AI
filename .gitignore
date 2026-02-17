@@ -1,6 +1,18 @@
-# Python
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+**/docker/
+Django/djangoLLM/.env.docker
+
+# Virtual Environments and Scripts
 **/env/
 **/venv/
+**/Scripts/
+
+# Python
 **/__pycache__/
 *.py[cod]
 *$py.class
@@ -11,18 +23,11 @@
 **/dist/
 **/build/
 
-# Environment
-.env
-.env.local
-.env.*.local
-
 # Large files / logs
 *.log
 Django/djangoLLM/final_import_log.txt
 Django/djangoLLM/import_log.txt
 Django/djangoLLM/compatibility_report.txt
-
-
 
 # OS
 .DS_Store
