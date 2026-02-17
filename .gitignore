@@ -25,6 +25,7 @@ Django/djangoLLM/.env.docker
 
 # Large files / logs
 *.log
+*.ctl
 Django/djangoLLM/final_import_log.txt
 Django/djangoLLM/import_log.txt
 Django/djangoLLM/compatibility_report.txt

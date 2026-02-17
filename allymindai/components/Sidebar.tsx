@@ -101,8 +101,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout, s
     <aside className="fixed inset-y-0 left-0 w-64 bg-white border-r hidden lg:flex flex-col z-30">
       <div className="p-6">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-24 h-24 bg-transparent rounded-3xl flex items-center justify-center shadow-lg shadow-indigo-100 overflow-hidden">
-            <img src="/allymind_logo.png" alt="Logo" className="w-full h-full object-cover scale-110" />
+          <div className="w-24 h-24 logo-frame rounded-[2rem]">
+            <img src="/allymind_logo.png" alt="Logo" className="w-full h-full object-cover scale-125 logo-image" />
           </div>
           <h1 className="text-2xl font-display font-bold text-indigo-900 tracking-tight">
             ALLYMIND

@@ -129,8 +129,8 @@ const MobileHeader: React.FC<{
     <>
       <header className="lg:hidden h-16 bg-white border-b flex items-center justify-between px-4 sticky top-0 z-50">
         <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-transparent rounded-lg flex items-center justify-center overflow-hidden">
-            <img src="/allymind_logo.png" alt="Logo" className="w-full h-full object-cover scale-125" />
+          <div className="w-12 h-12 logo-frame rounded-xl">
+            <img src="/allymind_logo.png" alt="Logo" className="w-full h-full object-cover scale-125 logo-image" />
           </div>
           <div className="flex flex-col">
             <span className="font-display font-bold text-base text-indigo-900 leading-tight">
@@ -261,47 +261,50 @@ const App: React.FC = () => {
         const today = days[new Date().getDay()];
         const todayDate = new Date().toISOString().split('T')[0];
 
-        // Get current session data for today before overwriting
-        const currentTodayEntry = chartData.find(d => d.name === today);
-        const currentTodaySeconds = currentTodayEntry ? (currentTodayEntry.hours || 0) * 3600 : 0;
+        setChartData(currentChartData => {
+          // Get current session data for today before overwriting
+          const currentTodayEntry = currentChartData.find(d => d.name === today);
+          const currentTodaySeconds = currentTodayEntry ? (currentTodayEntry.hours || 0) * 3600 : 0;
 
+          // Build new chart data from backend
+          const newChartData = [...INITIAL_CHART_DATA];
+          let backendTodaySeconds = 0;
 
-        // Build new chart data from backend
-        const newChartData = [...INITIAL_CHART_DATA];
-        let backendTodaySeconds = 0;
-
-        backendStats.forEach((entry: any) => {
-          const date = new Date(entry.date);
-          const dayName = days[date.getDay()];
-          const chartEntry = newChartData.find(d => d.name.startsWith(dayName.substring(0, 3)));
-          if (chartEntry) {
-            chartEntry.hours = parseFloat((entry.duration / 3600).toFixed(4));
-            // Track today's backend value
-            if (entry.date === todayDate) {
-              backendTodaySeconds = entry.duration;
+          backendStats.forEach((entry: any) => {
+            const date = new Date(entry.date);
+            const dayName = days[date.getDay()];
+            const chartEntry = newChartData.find(d => d.name.startsWith(dayName.substring(0, 3)));
+            if (chartEntry) {
+              chartEntry.hours = parseFloat((entry.duration / 3600).toFixed(4));
+              // Track today's backend value
+              if (entry.date === todayDate) {
+                backendTodaySeconds = entry.duration;
+              }
             }
+          });
+
+          // Merge: if current session has more time than backend for today, keep the higher value
+          const todayEntry = newChartData.find(d => d.name === today);
+          if (todayEntry && currentTodaySeconds > backendTodaySeconds) {
+            todayEntry.hours = parseFloat((currentTodaySeconds / 3600).toFixed(4));
           }
+
+          // Calculate true total from chart (backend + any extra session time)
+          const chartTotal = newChartData.reduce((sum, day) => sum + (day.hours || 0) * 3600, 0);
+
+          // Update stats based on the new chart total
+          setStats((prev: any) => ({
+            ...prev,
+            studySeconds: Math.round(chartTotal)
+          }));
+
+          return newChartData;
         });
-
-        // Merge: if current session has more time than backend for today, keep the higher value
-        const todayEntry = newChartData.find(d => d.name === today);
-        if (todayEntry && currentTodaySeconds > backendTodaySeconds) {
-          todayEntry.hours = parseFloat((currentTodaySeconds / 3600).toFixed(4));
-        }
-
-        // Calculate true total from chart (backend + any extra session time)
-        const chartTotal = newChartData.reduce((sum, day) => sum + (day.hours || 0) * 3600, 0);
-
-        setChartData(newChartData);
-        setStats((prev: any) => ({
-          ...prev,
-          studySeconds: Math.round(chartTotal)
-        }));
       }
     } catch (error) {
       console.warn('Failed to sync data from backend:', error);
     }
-  }, [chartData]);
+  }, []);
 
   const syncStudyTimeToBackend = React.useCallback(async (seconds: number) => {
     if (!isAuthenticated) return;
@@ -342,10 +345,9 @@ const App: React.FC = () => {
 
   // Track time spent on each view
   useEffect(() => {
-    // Only update the state every 10 seconds to reduce re-renders,
-    // but track every second internally if needed.
-    // For now, let's keep the 1s resolution but it's the main perf killer.
-    // Optimization: Sync view usage less frequently or on component switch.
+    // Local counter for 30s sync logic to avoid dependency on viewUsage/stats
+    let secondsSinceLastSync = 0;
+
     const interval = setInterval(() => {
       setViewUsage((prev) => ({
         ...prev,
@@ -353,16 +355,51 @@ const App: React.FC = () => {
       }));
 
       updateStudyProgress(1);
+      secondsSinceLastSync += 1;
 
       // Periodically sync to backend (every 30 seconds)
-      const currentUsageForView = (viewUsage[activeView] || 0) + 1;
-      if (currentUsageForView % 30 === 0) {
+      if (secondsSinceLastSync >= 30) {
         syncStudyTimeToBackend(30);
+        secondsSinceLastSync = 0;
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeView, viewUsage, syncStudyTimeToBackend]);
+  }, [activeView, syncStudyTimeToBackend]);
+
+  // Dynamic Favicon Zoomer
+  useEffect(() => {
+    const updateFavicon = () => {
+      const img = new Image();
+      img.src = '/allymind_logo.png';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 64; // Standard favicon size
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Define the crop area (zoom in on the center of the 1024x1024 original)
+          // The logo is roughly in the center 40%
+          const sourceSize = img.width * 0.45;
+          const sourceX = (img.width - sourceSize) / 2;
+          const sourceY = (img.height - sourceSize) / 2;
+
+          ctx.drawImage(img, sourceX, sourceY, sourceSize, sourceSize, 0, 0, size, size);
+
+          // Update the link tag
+          let link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            document.getElementsByTagName('head')[0].appendChild(link);
+          }
+          link.href = canvas.toDataURL('image/png');
+        }
+      };
+    };
+    updateFavicon();
+  }, []);
 
   // Preload AI model to reduce TTFT
   useEffect(() => {

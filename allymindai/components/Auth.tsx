@@ -46,8 +46,8 @@ const Auth: React.FC<AuthProps> = ({ onLoginSuccess }) => {
                 <div className="p-8">
                     <div className="text-center mb-6">
                         <div className="w-full flex justify-center mb-4">
-                            <div className="w-24 h-24 rounded-[2.5rem] shadow-xl overflow-hidden flex items-center justify-center bg-transparent">
-                                <img src="/allymind_logo.png" alt="ALLYMIND Logo" className="w-full h-full object-cover scale-150" />
+                            <div className="w-28 h-28 logo-frame rounded-[2.5rem]">
+                                <img src="/allymind_logo.png" alt="ALLYMIND Logo" className="w-full h-full object-cover scale-[1.65] logo-image" />
                             </div>
                         </div>
                         <h1 className="text-3xl font-display font-bold text-slate-900 mb-1">
