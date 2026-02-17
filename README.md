@@ -65,14 +65,6 @@ graph TD
 - **DevOps**: Docker & Compose, GitHub Actions CI/CD, Pre-commit Hooks (Black, ESLint).
 
 ---
-
-## 🚦 Installation & Setup
-
-### Prerequisites
-- **Docker Desktop** (with WSL2 backend for Windows)
-- **Ollama** installed on the host machine
-- **Python 3.11+** and **Node.js 22+** (for non-docker development)
-
 ## 🧪 CI/CD & Quality Control
 
 ALLYMIND AI maintains high code quality through automated pipelines:
@@ -92,4 +84,5 @@ ALLYMIND AI maintains high code quality through automated pipelines:
 Author: **arman**
 
 © 2026 ALLYMIND AI. All Rights Reserved.
+
 
