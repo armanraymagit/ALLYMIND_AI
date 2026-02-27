@@ -78,13 +78,7 @@ jobs:
 
       - name: Run Backend Tests
         working-directory: ./Django/djangoLLM
-        env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          OLLAMA_HOST: http://localhost:11434
+        
         run: |
           python manage.py test AI
 
